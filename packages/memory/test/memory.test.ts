@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createBucket } from '../src/bucket.ts';
 import { createMockStore } from '../src/walrus.ts';
-import { nsGroup, nsMember } from '../src/namespaces.ts';
+import { nsGroupRules as nsGroup, nsMember } from '../src/namespaces.ts';
 
 describe('mock store', () => {
   it('remembers and recalls within a namespace', async () => {
