@@ -46,7 +46,10 @@ export async function followCheckpoints(d: StreamDeps): Promise<void> {
     log('stream open', { watching: groups.reduce((n, g) => n + g.length, 0), streams: groups.length });
     try {
       await Promise.all(
-        groups.map(async (group) => {
+        groups.map(async (group, i) => {
+          // the free plan allows a few requests a second: open streams one by one, after the startup burst
+          await sleep(1_500 * (i + 1), abort.signal);
+          if (abort.signal.aborted) return;
           const call = d.client.subscriptionService.subscribeCheckpoints(
             {
               readMask: { paths: ['sequence_number', 'transactions.digest', 'transactions.balance_changes'] },
