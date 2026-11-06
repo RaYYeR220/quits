@@ -14,8 +14,8 @@ export const STARTING_LIMIT: Micro = 5_000_000n;
  * their decisions: approving a payment raises the limit to that amount;
  * objecting to one cuts the limit to half of it. Hard bounds stay on-chain.
  */
-export function limitFrom(decisions: { decision: 'approve' | 'object'; usdcMicro: Micro }[]): Micro {
-  let limit = STARTING_LIMIT;
+export function limitFrom(decisions: { decision: 'approve' | 'object'; usdcMicro: Micro }[], start: Micro = STARTING_LIMIT): Micro {
+  let limit = start;
   for (const d of decisions) {
     if (d.decision === 'approve') limit = d.usdcMicro > limit ? d.usdcMicro : limit;
     else {
@@ -26,14 +26,15 @@ export function limitFrom(decisions: { decision: 'approve' | 'object'; usdcMicro
   return limit;
 }
 
-export async function learnedLimit(ctx: Ctx, userId: string): Promise<Micro> {
+/** `start` is where trust begins; with a mandate it is a quarter of the per-debt cap. */
+export async function learnedLimit(ctx: Ctx, userId: string, start: Micro = STARTING_LIMIT): Promise<Micro> {
   const rows = await ctx.db
     .select({ decision: approvals.decision, usdcMicro: debts.usdcMicro, at: approvals.createdAt })
     .from(approvals)
     .innerJoin(debts, eq(debts.id, approvals.debtId))
     .where(eq(approvals.userId, userId))
     .orderBy(asc(approvals.createdAt));
-  return limitFrom(rows);
+  return limitFrom(rows, start);
 }
 
 export async function activeMandate(ctx: Ctx, userId: string, groupId: string) {
@@ -57,7 +58,7 @@ export async function autoSettleDecision(ctx: Ctx, debtId: string): Promise<Deci
   const m = await activeMandate(ctx, d.debtorId, d.groupId);
   if (!m) return { decision: 'none', reason: 'no_mandate' };
   if (!m.creditors.includes(d.creditorId)) return { decision: 'none', reason: 'creditor_not_listed' };
-  const limit = await learnedLimit(ctx, d.debtorId);
+  const limit = await learnedLimit(ctx, d.debtorId, m.maxPerDebt / 4n);
   const [approved] = await ctx.db
     .select()
     .from(approvals)

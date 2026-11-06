@@ -69,7 +69,7 @@ describe('learned auto-pay limit', () => {
       openTx: '0xopen',
     });
     const [d] = (await q.refreshDebts(groupId)).filter((x) => x.debtorId === 'ana');
-    expect(await q.autoSettleDecision(d!.id)).toEqual({ decision: 'ask', reason: 'over_learned_limit', limit: u('5') });
+    expect(await q.autoSettleDecision(d!.id)).toEqual({ decision: 'ask', reason: 'over_learned_limit', limit: u('12.5') });
     await q.decide(d!.id, 'ana', 'approve');
     expect(await q.learnedLimit('ana')).toBe(u('26.25'));
     expect(await q.autoSettleDecision(d!.id)).toMatchObject({ decision: 'record', mandateId: '0xmandate' });

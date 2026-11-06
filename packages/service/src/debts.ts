@@ -54,7 +54,7 @@ export async function refreshDebts(ctx: Ctx, groupId: string): Promise<DebtRow[]
     }
   }
   for (const t of want.values()) {
-    await ctx.db.insert(debts).values({ id: ctx.id(), groupId, debtorId: t.from, creditorId: t.to, usdcMicro: t.usdcMicro });
+    await ctx.db.insert(debts).values({ id: ctx.id(), groupId, debtorId: t.from, creditorId: t.to, usdcMicro: t.usdcMicro }).onConflictDoNothing();
   }
   return ctx.db.select().from(debts).where(and(eq(debts.groupId, groupId), inArray(debts.status, [...LIVE])));
 }

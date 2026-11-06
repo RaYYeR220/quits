@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "debts_live_pair_idx" ON "debts" USING btree ("group_id","debtor_id","creditor_id") WHERE status in ('open', 'recorded');

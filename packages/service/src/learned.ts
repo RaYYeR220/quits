@@ -204,7 +204,11 @@ export async function listRules(ctx: Ctx, groupId: string, memberIds: string[]):
  * read every rule memory back, re-index. Proves the product's knowledge lives
  * in the members' memory, not in our database.
  */
-export async function rebuildFromWalrus(ctx: Ctx, groupId: string, memberIds: string[]): Promise<{ rules: number }> {
+export async function rebuildFromWalrus(
+  ctx: Ctx,
+  groupId: string,
+  memberIds: string[],
+): Promise<{ rules: number; indexed: number; complete: boolean }> {
   const accounts = await accountsFor(ctx, memberIds);
   const reads = [
     { ns: nsGroupRules(groupId), owner: undefined as string | undefined, accountId: null as string | null },
@@ -222,6 +226,10 @@ export async function rebuildFromWalrus(ctx: Ctx, groupId: string, memberIds: st
   }
 
   const existing = await indexedRules(ctx, groupId, memberIds);
+  const stored = existing.filter((e) => e.mState === 'done').map((e) => e.r.id);
+  const foundIds = new Set(found.map((f) => f.rule.id));
+  // Only replace the index when Walrus gave back everything it holds; otherwise keep it and say so.
+  if (!stored.every((id) => foundIds.has(id))) return { rules: found.length, indexed: stored.length, complete: false };
   const ids = existing.map((e) => e.r.id);
   if (ids.length) await ctx.db.delete(rulesTable).where(inArray(rulesTable.id, ids));
 
@@ -252,5 +260,5 @@ export async function rebuildFromWalrus(ctx: Ctx, groupId: string, memberIds: st
       })
       .onConflictDoNothing();
   }
-  return { rules: found.length };
+  return { rules: found.length, indexed: stored.length, complete: true };
 }

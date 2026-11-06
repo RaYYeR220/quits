@@ -83,9 +83,12 @@ describe('the learning loop', () => {
     const rent = { ...dinnerParse, category: 'rent', amount: '1000', items: [], description: 'Rent' };
     llm.push(rent);
     const before = await q.addExpenseFromText(groupId, 'ana', 'rent 1000');
-    await q.ctx.db.delete((await import('@quits/db')).rules);
+    const { rules: rulesTable, memories: memTable } = await import('@quits/db');
+    // the local index loses its rows (but Walrus still has the memory)
+    await q.ctx.db.delete(rulesTable);
+    await q.ctx.db.delete(memTable);
     expect(await q.rules(groupId)).toEqual([]);
-    expect(await q.rebuildFromWalrus(groupId)).toEqual({ rules: 1 });
+    expect(await q.rebuildFromWalrus(groupId)).toMatchObject({ rules: 1, complete: true });
     llm.push(rent);
     const after = await q.addExpenseFromText(groupId, 'ana', 'rent 1000');
     expect(before.ok && after.ok && after.proposal.shares).toEqual(before.ok && before.proposal.shares);
@@ -163,5 +166,24 @@ describe('when Walrus does not return a stored rule', () => {
     expect(b.ok && b.proposal.shares.ana).toBe(u('18.75'));
     expect(b.ok && b.proposal.why[0]?.state).toBe('cached');
     expect(b.ok && b.proposal.why[0]?.blobId).toBeTruthy();
+  });
+});
+
+describe('rebuild safety', () => {
+  it('keeps the index when Walrus returns fewer rules than it holds', async () => {
+    const inner = createMockStore();
+    let blind = false;
+    const memory: MemoryStore = { ...inner, kind: inner.kind, recall: async (...a) => (blind ? [] : inner.recall(...a)) };
+    const { q, groupId } = await setup({ memory });
+    await q.learnRule({
+      groupId,
+      scope: 'group',
+      sentence: 'Ben always covers taxis.',
+      rule: { v: 1, id: 'taxi', learnedAt: '2026-10-18T09:00:00Z', kind: 'covers', member: 'ben', when: { category: ['taxi'] } },
+    });
+    await q.flushMemory();
+    blind = true;
+    expect(await q.rebuildFromWalrus(groupId)).toEqual({ rules: 0, indexed: 1, complete: false });
+    expect((await q.rules(groupId)).map((r) => r.id)).toEqual(['taxi']);
   });
 });

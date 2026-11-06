@@ -13,5 +13,5 @@ export const POST = handle(async (_req: Request, { params }: P) => {
   await q.assertMember(id, s.uid);
   const started = Date.now();
   const r = await q.rebuildFromWalrus(id);
-  return { rebuilt: r.rules, ms: Date.now() - started, rules: await q.rules(id) };
+  return { rebuilt: r.rules, indexed: r.indexed, complete: r.complete, ms: Date.now() - started, rules: await q.rules(id) };
 });

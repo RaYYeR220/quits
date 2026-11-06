@@ -109,7 +109,8 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
       const call = inner.serverStreaming(method, input, options);
       call.status.then(
         () => recordCall(log, { surface: 'grpc', method: methodName(method), ms: elapsedSince(t0), ok: true }),
-        (err: unknown) => recordCall(log, { surface: 'grpc', method: methodName(method), ms: elapsedSince(t0), ok: false, code: errorCode(err) }),
+        // a stream we close on purpose (periodic reconnect) ends CANCELLED; that is not a failure
+        (err: unknown) => recordCall(log, { surface: 'grpc', method: methodName(method), ms: elapsedSince(t0), ok: errorCode(err) === 'CANCELLED', code: errorCode(err) }),
       );
       return call;
     },

@@ -20,13 +20,31 @@ const env = (k: string) => process.env[k]?.trim() || undefined;
 
 export const network = (env('SUI_NETWORK') ?? 'mainnet') as SuiNetwork;
 
-let dbP: Promise<Db> | null = null;
+/** Process-wide singletons. Route bundles each load this module, so state lives on globalThis. */
+const g = globalThis as typeof globalThis & {
+  __quitsDb?: Promise<Db>;
+  __quitsService?: Promise<Quits>;
+  __quitsSui?: TatumSui;
+  __quitsDrain?: ReturnType<typeof setInterval>;
+};
+
+/** Caches a startup promise but forgets it if it fails, so the next request retries. */
+function once<T>(key: '__quitsDb' | '__quitsService', make: () => Promise<T>): Promise<T> {
+  const cached = g[key] as Promise<T> | undefined;
+  if (cached) return cached;
+  const p = make().catch((e) => {
+    delete g[key];
+    throw e;
+  });
+  (g as Record<string, unknown>)[key] = p;
+  return p;
+}
+
 export function getDb(): Promise<Db> {
-  dbP ??= (async () => {
+  return once('__quitsDb', async () => {
     const url = env('DATABASE_URL');
-    return url ? connectDb(url, { migrate: env('DB_MIGRATE') === '1' }) : memoryDb();
-  })();
-  return dbP;
+    return url ? connectDb(url, { migrate: env('DB_MIGRATE') === '1', max: Number(env('DB_POOL_MAX') ?? 3) }) : memoryDb();
+  });
 }
 
 /** Every Tatum call is written to `tatum_calls` so the proof page can show live traffic. */
@@ -40,10 +58,9 @@ function dbCallLog(): CallLog {
   };
 }
 
-let sui: TatumSui | null = null;
 export function getSui(): TatumSui {
-  sui ??= createTatumSui({ apiKey: env('TATUM_API_KEY'), network, log: dbCallLog() });
-  return sui;
+  g.__quitsSui ??= createTatumSui({ apiKey: env('TATUM_API_KEY'), network, log: dbCallLog() });
+  return g.__quitsSui;
 }
 export const getSuiGraphql = () => getSui().graphql;
 
@@ -67,9 +84,8 @@ function fixedRates() {
   };
 }
 
-let quitsP: Promise<Quits> | null = null;
 export function getQuits(): Promise<Quits> {
-  quitsP ??= (async () => {
+  return once('__quitsService', async () => {
     const db = await getDb();
     const data = createTatumData({ apiKey: env('TATUM_API_KEY') ?? '', log: dbCallLog() });
     const memory = memoryStore();
@@ -80,10 +96,10 @@ export function getQuits(): Promise<Quits> {
       fx: fixedRates() ?? { usdcPerFiat: (fiat) => data.usdcPerFiat(fiat) },
     });
     // The in-process memory stand-in lives in this process only, so it is drained here.
-    if (memory.kind === 'mock') setInterval(() => void q.drainMemory().catch(() => {}), 1_000).unref();
+    if (memory.kind === 'mock' && !g.__quitsDrain) g.__quitsDrain = setInterval(() => void q.drainMemory().catch(() => {}), 2_000);
+    g.__quitsDrain?.unref?.();
     return q;
-  })();
-  return quitsP;
+  });
 }
 
 export function chainConfig(): QuitsChainConfig {

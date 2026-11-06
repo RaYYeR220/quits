@@ -145,7 +145,11 @@ export const debts = pgTable(
     createdAt: created(),
     settledAt: timestamp('settled_at', { withTimezone: true }),
   },
-  (t) => [index('debts_group_idx').on(t.groupId, t.status)],
+  (t) => [
+    index('debts_group_idx').on(t.groupId, t.status),
+    // At most one live debt per pair, so two concurrent refreshes can't both create one.
+    uniqueIndex('debts_live_pair_idx').on(t.groupId, t.debtorId, t.creditorId).where(sql`status in ('open', 'recorded')`),
+  ],
 );
 
 export const mandates = pgTable('mandates', {
