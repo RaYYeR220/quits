@@ -1,12 +1,32 @@
 import { desc, eq, isNotNull, sql } from 'drizzle-orm';
 import { debts, memories, tatumCalls } from '@quits/db';
 import { blobUrl } from '@quits/memory';
-import { chainConfig, getQuits, memoryStore, network } from '@/lib/deps.ts';
+import { listMemoryReceipts, type MemoryReceipt } from '@quits/chain';
+import { chainConfig, getQuits, getSuiGraphql, memoryStore, network } from '@/lib/deps.ts';
 import { explorerTx } from '@/lib/paydebt.ts';
 import { handle } from '@/lib/route.ts';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+let receiptsCache: { at: number; value: { owner: string; agentId: string; count: number; latest: (MemoryReceipt & { suiscan: string })[] } | { error: string } | null } | null = null;
+
+/** The Walrus Blob objects our delegate key wrote, read from chain through Tatum (cached for a minute). */
+async function onchainReceipts() {
+  const owner = process.env.MEMWAL_OWNER_ADDRESS?.trim();
+  const agentId = process.env.MEMWAL_AGENT_ID?.trim();
+  if (!owner || !agentId || network === 'localnet') return null;
+  if (receiptsCache && Date.now() - receiptsCache.at < 60_000) return receiptsCache.value;
+  let value: NonNullable<typeof receiptsCache>['value'];
+  try {
+    const list = await listMemoryReceipts(getSuiGraphql(), owner, { agentId, namespacePrefix: 'quits:' });
+    value = { owner, agentId, count: list.length, latest: list.slice(0, 20).map((r) => ({ ...r, suiscan: `https://suiscan.xyz/mainnet/object/${r.objectId}` })) };
+  } catch (e) {
+    value = { error: e instanceof Error ? e.message : String(e) };
+  }
+  receiptsCache = { at: Date.now(), value };
+  return value;
+}
 
 /** Public receipts: live Tatum traffic, memories stored on Walrus, settlements on Sui. */
 export const GET = handle(async () => {
@@ -34,6 +54,7 @@ export const GET = handle(async () => {
     memoryBackend: memoryStore().kind,
     package: pkg,
     tatum: { recent: calls, byMethod },
+    onchainMemory: await onchainReceipts(),
     memories: {
       stored: storedCount[0]?.n ?? 0,
       latest: stored.map((m) => ({ ...m, text: m.text.replace(/\s*⟦quits:v1 .*⟧\s*$/su, ''), walruscan: m.blobId ? blobUrl(m.blobId) : null })),

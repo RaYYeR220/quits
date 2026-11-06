@@ -9,3 +9,4 @@ export * from './tatum-graphql.ts';
 export * from './tatum-grpc.ts';
 export * from './tx.ts';
 export * from './usdc.ts';
+export * from './memory-receipts.ts';
