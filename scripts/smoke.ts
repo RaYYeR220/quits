@@ -47,7 +47,7 @@ if (add.data.ok) {
 }
 
 const g2 = await call('GET', `/api/groups/${tab}`);
-const mine = (g2.data.debts ?? []).find((d: any) => d.status === 'open' && d.usdcMicro && BigInt(d.usdcMicro) <= 5_000_000n);
+const mine = (g2.data.debts ?? []).find((d: any) => d.status === 'open' && d.usdcMicro && BigInt(d.usdcMicro) <= 1_000_000n);
 step('there is a small open debt', Boolean(mine), mine);
 if (mine) {
   const debtor = (g2.data.members ?? []).find((m: any) => m.id === mine.debtorId);

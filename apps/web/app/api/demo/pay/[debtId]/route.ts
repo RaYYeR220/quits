@@ -6,7 +6,7 @@ import { handle, HttpError, requireSession } from '@/lib/route.ts';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const DEMO_CAP = 5_000_000n;
+const DEMO_CAP = 1_000_000n;
 
 type P = { params: Promise<{ debtId: string }> };
 
@@ -22,7 +22,7 @@ export const POST = handle(async (req: Request, { params }: P) => {
   const q = await getQuits();
   const d = await q.debt(debtId);
   if (d.debtorId !== s.uid) throw new HttpError(403, 'You can only pay your own debts.');
-  if (d.usdcMicro > DEMO_CAP) throw new HttpError(400, 'Demo wallets settle debts up to 5 USDC. Try the Coffee tab.');
+  if (d.usdcMicro > DEMO_CAP) throw new HttpError(400, 'Demo wallets settle debts up to 1 USDC. Try the Coffee tab.');
   const signer = demoSigner(s.uid);
   if (!signer) throw new HttpError(503, 'Demo wallets are not configured.');
 

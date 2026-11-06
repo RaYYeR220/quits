@@ -7,9 +7,9 @@ import { HttpError } from './route.ts';
 
 /** Bounds every demo mandate uses; real members choose their own. */
 export const DEMO_TERMS = {
-  lifetimeCap: 20_000_000n,
-  weeklyLimit: 10_000_000n,
-  maxPerDebt: 5_000_000n,
+  lifetimeCap: 3_000_000n,
+  weeklyLimit: 2_000_000n,
+  maxPerDebt: 1_000_000n,
   objectionWindowMs: 60_000,
   days: 7,
 };

@@ -14,7 +14,7 @@ const first = await call('POST', '/api/demo/session', { as: 'ana' });
 const tab = first.data.tab as string;
 const key = first.data.tabKey as string;
 const g0 = await call('GET', `/api/groups/${tab}`);
-const debt = (g0.data.debts ?? []).find((x: any) => x.status === 'open' && BigInt(x.usdcMicro) <= 5_000_000n);
+const debt = (g0.data.debts ?? []).find((x: any) => x.status === 'open' && BigInt(x.usdcMicro) <= 1_000_000n);
 if (!debt) throw new Error('no small open debt in the tab');
 const who = (g0.data.members ?? []).find((m: any) => m.id === debt.debtorId);
 await call('POST', '/api/demo/session', { as: who.name, tab: key });

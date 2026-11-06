@@ -145,8 +145,8 @@ export async function seedDemo(ctx: Ctx, addresses: Partial<Record<'ANA' | 'BEN'
 export const SANDBOX_PREFIX = 'demo-tab-';
 
 const SANDBOX: Step[] = [
-  { at: '', payer: B, text: 'Morning coffees', category: 'drinks', amount: '7.20' },
-  { at: '', payer: C, text: 'Friday beers and fries', category: 'drinks', amount: '9.60', items: [{ label: 'beers', amount: '6.40', tags: ['alcohol'] }] },
+  { at: '', payer: B, text: 'Morning coffees', category: 'drinks', amount: '2.40' },
+  { at: '', payer: C, text: 'Friday beers and fries', category: 'drinks', amount: '3.20', items: [{ label: 'beers', amount: '2.00', tags: ['alcohol'] }] },
 ];
 
 /**
