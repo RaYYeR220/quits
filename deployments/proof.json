@@ -4,8 +4,21 @@
     "agentId": "951edfde65ae7bd307148bd7e7ed5beed9bfc960958ae7fb7f0e153982cf2505"
   },
   "walletPayments": [],
-  "agentPayments": [],
+  "agentPayments": [
+    "4ax2Bq9CFiu9Wyu4CS3sMdGZUMdhJoxjWvZq2ntryw8j"
+  ],
   "externalPayments": [],
-  "debts": [],
-  "mandates": []
+  "debts": [
+    "0xd868f5fa1b00a195c57e131d26e2401d993d618e2698a2c1824ac939d4990dd0"
+  ],
+  "mandates": [
+    {
+      "mandate": "0x42ee50b05c1c6840d6c488efaf7d50d5f45557a117ce388e728e88b334cee9ec",
+      "allowance": "0xe003e0aefcb001a2bb775f0d18813fb6e5414a339270d874d07de4af35ef87ed"
+    }
+  ],
+  "notes": {
+    "recordDebtTx": "AgCSHqvWUGJ1CKNsLBdyC6V6CuQg1SxLVGvebM5nmjW4",
+    "openMandateTx": "55iv8MxbCiuPyNSXKai8XAHy5wJ3Q7nzMgDNn3HPzejm"
+  }
 }

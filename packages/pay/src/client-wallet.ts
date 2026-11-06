@@ -2,7 +2,7 @@ import { SimulationError, type ClientWithCoreApi } from '@mysten/sui/client';
 import type { Signer } from '@mysten/sui/cryptography';
 import type { Transaction } from '@mysten/sui/transactions';
 import { toBase64 } from '@mysten/sui/utils';
-import { ChainTxError, abortInfo, gaslessUsdcTx, sendFundsTx } from '@quits/chain';
+import { ChainTxError, abortInfo, gaslessUsdcTx, sendFundsTx, withValidDuring } from '@quits/chain';
 import { encodePaymentHeader, exactSuiOption, type X402Requirements } from './x402.ts';
 
 /**
@@ -16,11 +16,10 @@ export async function buildWalletPayment(
 ): Promise<string> {
   const accepted = exactSuiOption(req);
   const transfer = { to: accepted.payTo, amount: BigInt(accepted.amount) };
-  const tx =
-    (gasless ?? accepted.network === 'sui:mainnet')
-      ? gaslessUsdcTx({ ...transfer, usdcType: accepted.asset })
-      : sendFundsTx({ ...transfer, coinType: accepted.asset });
+  const isGasless = gasless ?? accepted.network === 'sui:mainnet';
+  const tx = isGasless ? gaslessUsdcTx({ ...transfer, usdcType: accepted.asset }) : sendFundsTx({ ...transfer, coinType: accepted.asset });
   tx.setSender(signer.toSuiAddress());
+  if (isGasless) await withValidDuring(tx, client);
   const { bytes, signature } = await signBuilt(tx, signer, client);
   return encodePaymentHeader({ x402Version: 2, resource: req.resource, accepted, payload: { signature, transaction: toBase64(bytes) } });
 }

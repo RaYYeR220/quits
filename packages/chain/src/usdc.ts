@@ -1,3 +1,4 @@
+import type { ClientWithCoreApi } from '@mysten/sui/client';
 import { GASLESS_FLOOR, formatUsdc } from '@quits/core';
 import { Transaction } from '@mysten/sui/transactions';
 import { USDC_MAINNET } from './config.ts';
@@ -32,5 +33,25 @@ export function gaslessUsdcTx({ to, amount, usdcType = USDC_MAINNET }: { to: str
   tx.setGasPrice(0);
   tx.setGasBudget(0);
   tx.setGasPayment([]);
+  return tx;
+}
+
+/**
+ * A gasless transfer has no object inputs, so Sui requires a `ValidDuring`
+ * expiration (at most two epochs) plus a nonce to keep it unique.
+ */
+export async function withValidDuring(tx: Transaction, client: ClientWithCoreApi): Promise<Transaction> {
+  const [{ chainIdentifier }, { systemState }] = await Promise.all([client.core.getChainIdentifier(), client.core.getCurrentSystemState()]);
+  const epoch = BigInt(systemState.epoch);
+  tx.setExpiration({
+    ValidDuring: {
+      minEpoch: String(epoch),
+      maxEpoch: String(epoch + 1n),
+      minTimestamp: null,
+      maxTimestamp: null,
+      chain: chainIdentifier,
+      nonce: (Math.random() * 4294967296) >>> 0,
+    },
+  });
   return tx;
 }
