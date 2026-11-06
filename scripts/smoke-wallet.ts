@@ -86,11 +86,6 @@ gas.transferObjects([gas.splitCoins(gas.gas, [20_000_000n])], blake.address);
 const gasTx = await signAndExecute(client, gasKey, gas);
 step('debtor gets 0.02 SUI for the mandate', Boolean(gasTx.digest), gasTx.digest);
 
-// hand the debtor's leftover SUI back to the gas key
-const back = new Transaction();
-back.transferObjects([back.gas], gasKey.toSuiAddress());
-await signAndExecute(client, blake.key, back);
-
 for (const m of [avery, blake]) {
   const r = await m.signIn();
   step(`${m.name} signs in with a wallet signature`, r.status === 200 && Boolean(r.data.uid), r.data);
@@ -140,6 +135,11 @@ step('server builds the mandate for the wallet to sign', mp.status === 200 && Bo
 const ms = await blake.sign(mp.data.txBytes);
 const mc = await blake.call('POST', `/api/groups/${groupId}/autosettle`, { step: 'confirm', txBytes: ms.bytes, signature: ms.signature, maxPerDebt: '1000000', weeklyLimit: '2000000', lifetimeCap: '3000000', objectionWindowMs: 3_600_000, days: 7 });
 step('debtor signs the mandate; it opens on mainnet', mc.status === 200 && Boolean(mc.data.mandateObjectId), mc.data);
+
+// hand the debtor's leftover SUI back to the gas key
+const back = new Transaction();
+back.transferObjects([back.gas], gasKey.toSuiAddress());
+await signAndExecute(client, blake.key, back);
 
 for (const m of [avery, blake]) {
   const left = await usdcOf(m.address);

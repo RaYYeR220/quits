@@ -1,0 +1,5644 @@
+{
+  "runId": "20261106-095146-mercury-3-s20261107-heldout-v3",
+  "label": "heldout-v3",
+  "startedAt": "2026-11-06T09:51:46.770Z",
+  "finishedAt": "2026-11-06T09:52:23.222Z",
+  "durationMs": 36452,
+  "config": {
+    "systems": [
+      "quits"
+    ],
+    "groups": [
+      "flat",
+      "trip",
+      "couple"
+    ],
+    "weeks": 4,
+    "perWeek": 10,
+    "seed": 20261107,
+    "model": "mercury-3",
+    "provider": "api.venice.ai",
+    "toleranceUsd": "0.01",
+    "maxCorrections": 2,
+    "concurrency": 4
+  },
+  "code": {
+    "commit": "6ab9ab2",
+    "dirty": []
+  },
+  "groups": [
+    {
+      "id": "flat",
+      "name": "Flat 5B",
+      "about": "Four flatmates sharing rent, bills, groceries and nights out. Rent is paid weekly.",
+      "members": [
+        "ana",
+        "ben",
+        "clara",
+        "dan"
+      ],
+      "hidden": [
+        {
+          "id": "flat.rent-by-room",
+          "rule": {
+            "v": 1,
+            "id": "flat.rent-by-room",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "category": [
+                "rent"
+              ]
+            },
+            "kind": "weights",
+            "weights": {
+              "ana": 40,
+              "ben": 20,
+              "clara": 20,
+              "dan": 20
+            }
+          },
+          "say": [
+            "Ana has the big room, so she pays double what each of the others pays on rent.",
+            "Rent isn’t even: Ana’s room is twice the size, so her share is twice anyone else’s.",
+            "Rent goes by room size. Ana pays 40%, Ben, Clara and Dan 20% each."
+          ]
+        },
+        {
+          "id": "flat.ana-no-alcohol",
+          "rule": {
+            "v": 1,
+            "id": "flat.ana-no-alcohol",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "alcohol"
+              ]
+            },
+            "kind": "exclude",
+            "member": "ana"
+          },
+          "say": [
+            "Ana doesn’t drink, leave her out of the alcohol.",
+            "No alcohol on Ana’s share please.",
+            "Ana’s teetotal, take the booze off her share."
+          ]
+        },
+        {
+          "id": "flat.ben-covers-taxis",
+          "rule": {
+            "v": 1,
+            "id": "flat.ben-covers-taxis",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "category": [
+                "taxi"
+              ]
+            },
+            "kind": "covers",
+            "member": "ben"
+          },
+          "say": [
+            "Ben always pays for the taxis himself.",
+            "Taxis are on Ben, he expenses them through work.",
+            "Don’t split cabs, Ben covers every ride."
+          ]
+        },
+        {
+          "id": "flat.clara-no-meat",
+          "rule": {
+            "v": 1,
+            "id": "flat.clara-no-meat",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "meat"
+              ]
+            },
+            "kind": "exclude",
+            "member": "clara"
+          },
+          "say": [
+            "Clara doesn’t eat meat, she shouldn’t pay for it.",
+            "Leave Clara out of anything with meat.",
+            "Take the meat off Clara’s share, she never eats it."
+          ]
+        },
+        {
+          "id": "flat.dan-no-subscriptions",
+          "rule": {
+            "v": 1,
+            "id": "flat.dan-no-subscriptions",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "category": [
+                "subscription"
+              ]
+            },
+            "kind": "exclude",
+            "member": "dan"
+          },
+          "say": [
+            "Dan doesn’t use any of the subscriptions, keep him off them.",
+            "Leave Dan out of the streaming subscriptions.",
+            "Dan never signed up for these subscriptions, he shouldn’t pay."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "trip",
+      "name": "Alps road trip",
+      "about": "Five friends on a four-week winter trip. Ana, Ben and Clara drive Ana’s car; Dan and Eve take the train between stops. Only Ben, Dan and Eve ski.",
+      "members": [
+        "ana",
+        "ben",
+        "clara",
+        "dan",
+        "eve"
+      ],
+      "hidden": [
+        {
+          "id": "trip.ana-no-alcohol",
+          "rule": {
+            "v": 1,
+            "id": "trip.ana-no-alcohol",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "alcohol"
+              ]
+            },
+            "kind": "exclude",
+            "member": "ana"
+          },
+          "say": [
+            "Ana doesn’t drink, leave her out of the alcohol.",
+            "No alcohol on Ana’s share please.",
+            "Ana’s teetotal, take the booze off her share."
+          ]
+        },
+        {
+          "id": "trip.clara-no-meat",
+          "rule": {
+            "v": 1,
+            "id": "trip.clara-no-meat",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "meat"
+              ]
+            },
+            "kind": "exclude",
+            "member": "clara"
+          },
+          "say": [
+            "Clara doesn’t eat meat, she shouldn’t pay for it.",
+            "Leave Clara out of anything with meat.",
+            "Take the meat off Clara’s share, she never eats it."
+          ]
+        },
+        {
+          "id": "trip.skiers-pay-ski",
+          "rule": {
+            "v": 1,
+            "id": "trip.skiers-pay-ski",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "ski"
+              ]
+            },
+            "kind": "only",
+            "members": [
+              "ben",
+              "dan",
+              "eve"
+            ]
+          },
+          "say": [
+            "Only Ben, Dan and Eve ski, so the ski stuff is just on them.",
+            "Ana and Clara don’t ski, leave them out of the ski passes and rentals.",
+            "Split anything for skiing between the skiers: Ben, Dan and Eve."
+          ]
+        },
+        {
+          "id": "trip.car-pays-fuel",
+          "rule": {
+            "v": 1,
+            "id": "trip.car-pays-fuel",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "fuel"
+              ]
+            },
+            "kind": "only",
+            "members": [
+              "ana",
+              "ben",
+              "clara"
+            ]
+          },
+          "say": [
+            "Petrol is only for the people in the car: Ana, Ben and Clara.",
+            "Dan and Eve take the train, they don’t pay for fuel.",
+            "Split the fuel between Ana, Ben and Clara, they’re the ones in the car."
+          ]
+        },
+        {
+          "id": "trip.ana-double-lodging",
+          "rule": {
+            "v": 1,
+            "id": "trip.ana-double-lodging",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "category": [
+                "accommodation"
+              ]
+            },
+            "kind": "weights",
+            "weights": {
+              "ana": 2,
+              "ben": 1,
+              "clara": 1,
+              "dan": 1,
+              "eve": 1
+            }
+          },
+          "say": [
+            "Ana has a room to herself, so she pays a double share of the lodging.",
+            "Accommodation isn’t even: Ana’s share is twice everyone else’s because she gets her own room.",
+            "Ana pays two shares of every place we stay, the rest of us one each."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "couple",
+      "name": "Fin & Gia",
+      "about": "A couple sharing a household. They split everything by income, but what you buy for yourself is yours.",
+      "members": [
+        "fin",
+        "gia"
+      ],
+      "hidden": [
+        {
+          "id": "couple.sixty-forty",
+          "rule": {
+            "v": 1,
+            "id": "couple.sixty-forty",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {},
+            "kind": "weights",
+            "weights": {
+              "fin": 60,
+              "gia": 40
+            }
+          },
+          "say": [
+            "We split everything 60/40, Fin pays the bigger part.",
+            "It’s not half and half: Fin pays three parts for every two of Gia’s.",
+            "Fin takes 60% and Gia 40% of everything we share."
+          ]
+        },
+        {
+          "id": "couple.fin-personal",
+          "rule": {
+            "v": 1,
+            "id": "couple.fin-personal",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "personal"
+              ],
+              "payer": "fin"
+            },
+            "kind": "only",
+            "members": [
+              "fin"
+            ]
+          },
+          "say": [
+            "Fin bought that for himself, his personal things are on him.",
+            "Personal stuff Fin buys is his alone, don’t split it.",
+            "When Fin buys something just for himself, Gia shouldn’t pay any of it."
+          ]
+        },
+        {
+          "id": "couple.gia-personal",
+          "rule": {
+            "v": 1,
+            "id": "couple.gia-personal",
+            "learnedAt": "2026-10-01T00:00:00.000Z",
+            "when": {
+              "tags": [
+                "personal"
+              ],
+              "payer": "gia"
+            },
+            "kind": "only",
+            "members": [
+              "gia"
+            ]
+          },
+          "say": [
+            "Gia bought that for herself, her personal things are on her.",
+            "Personal stuff Gia buys is hers alone, don’t split it.",
+            "When Gia buys something just for herself, Fin shouldn’t pay any of it."
+          ]
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "llmCalls": 14,
+    "llmErrors": 0,
+    "promptTokens": 22157,
+    "completionTokens": 30701
+  },
+  "aggregates": {
+    "quits": {
+      "total": {
+        "expenses": 120,
+        "firstTryExact": 107,
+        "firstTryExactPct": 89.2,
+        "corrections": 14,
+        "correctionsPer10": 1.17,
+        "misallocatedUsd": "415.31",
+        "unresolved": 0,
+        "invalidFirst": 0,
+        "oneOffFixes": 0,
+        "llmCalls": 14,
+        "llmErrors": 0,
+        "promptTokens": 22157,
+        "completionTokens": 30701,
+        "tokensPerExpense": 440,
+        "promptTokensPerExpense": 185,
+        "latencyMsMean": 607
+      },
+      "byWeek": [
+        {
+          "expenses": 30,
+          "firstTryExact": 17,
+          "firstTryExactPct": 56.7,
+          "corrections": 14,
+          "correctionsPer10": 4.67,
+          "misallocatedUsd": "415.31",
+          "unresolved": 0,
+          "invalidFirst": 0,
+          "oneOffFixes": 0,
+          "llmCalls": 14,
+          "llmErrors": 0,
+          "promptTokens": 22157,
+          "completionTokens": 30701,
+          "tokensPerExpense": 1762,
+          "promptTokensPerExpense": 739,
+          "latencyMsMean": 2360
+        },
+        {
+          "expenses": 30,
+          "firstTryExact": 30,
+          "firstTryExactPct": 100,
+          "corrections": 0,
+          "correctionsPer10": 0,
+          "misallocatedUsd": "0.00",
+          "unresolved": 0,
+          "invalidFirst": 0,
+          "oneOffFixes": 0,
+          "llmCalls": 0,
+          "llmErrors": 0,
+          "promptTokens": 0,
+          "completionTokens": 0,
+          "tokensPerExpense": 0,
+          "promptTokensPerExpense": 0,
+          "latencyMsMean": 24
+        },
+        {
+          "expenses": 30,
+          "firstTryExact": 30,
+          "firstTryExactPct": 100,
+          "corrections": 0,
+          "correctionsPer10": 0,
+          "misallocatedUsd": "0.00",
+          "unresolved": 0,
+          "invalidFirst": 0,
+          "oneOffFixes": 0,
+          "llmCalls": 0,
+          "llmErrors": 0,
+          "promptTokens": 0,
+          "completionTokens": 0,
+          "tokensPerExpense": 0,
+          "promptTokensPerExpense": 0,
+          "latencyMsMean": 27
+        },
+        {
+          "expenses": 30,
+          "firstTryExact": 30,
+          "firstTryExactPct": 100,
+          "corrections": 0,
+          "correctionsPer10": 0,
+          "misallocatedUsd": "0.00",
+          "unresolved": 0,
+          "invalidFirst": 0,
+          "oneOffFixes": 0,
+          "llmCalls": 0,
+          "llmErrors": 0,
+          "promptTokens": 0,
+          "completionTokens": 0,
+          "tokensPerExpense": 0,
+          "promptTokensPerExpense": 0,
+          "latencyMsMean": 19
+        }
+      ],
+      "byGroup": {
+        "flat": {
+          "total": {
+            "expenses": 40,
+            "firstTryExact": 35,
+            "firstTryExactPct": 87.5,
+            "corrections": 5,
+            "correctionsPer10": 1.25,
+            "misallocatedUsd": "208.23",
+            "unresolved": 0,
+            "invalidFirst": 0,
+            "oneOffFixes": 0,
+            "llmCalls": 5,
+            "llmErrors": 0,
+            "promptTokens": 7844,
+            "completionTokens": 6669,
+            "tokensPerExpense": 363,
+            "promptTokensPerExpense": 196,
+            "latencyMsMean": 470
+          },
+          "byWeek": [
+            {
+              "expenses": 10,
+              "firstTryExact": 5,
+              "firstTryExactPct": 50,
+              "corrections": 5,
+              "correctionsPer10": 5,
+              "misallocatedUsd": "208.23",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 5,
+              "llmErrors": 0,
+              "promptTokens": 7844,
+              "completionTokens": 6669,
+              "tokensPerExpense": 1451,
+              "promptTokensPerExpense": 784,
+              "latencyMsMean": 1842
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 13
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 14
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 12
+            }
+          ]
+        },
+        "trip": {
+          "total": {
+            "expenses": 40,
+            "firstTryExact": 35,
+            "firstTryExactPct": 87.5,
+            "corrections": 5,
+            "correctionsPer10": 1.25,
+            "misallocatedUsd": "175.98",
+            "unresolved": 0,
+            "invalidFirst": 0,
+            "oneOffFixes": 0,
+            "llmCalls": 5,
+            "llmErrors": 0,
+            "promptTokens": 7991,
+            "completionTokens": 8143,
+            "tokensPerExpense": 403,
+            "promptTokensPerExpense": 200,
+            "latencyMsMean": 511
+          },
+          "byWeek": [
+            {
+              "expenses": 10,
+              "firstTryExact": 5,
+              "firstTryExactPct": 50,
+              "corrections": 5,
+              "correctionsPer10": 5,
+              "misallocatedUsd": "175.98",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 5,
+              "llmErrors": 0,
+              "promptTokens": 7991,
+              "completionTokens": 8143,
+              "tokensPerExpense": 1613,
+              "promptTokensPerExpense": 799,
+              "latencyMsMean": 1994
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 20
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 15
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 16
+            }
+          ]
+        },
+        "couple": {
+          "total": {
+            "expenses": 40,
+            "firstTryExact": 37,
+            "firstTryExactPct": 92.5,
+            "corrections": 4,
+            "correctionsPer10": 1,
+            "misallocatedUsd": "31.09",
+            "unresolved": 0,
+            "invalidFirst": 0,
+            "oneOffFixes": 0,
+            "llmCalls": 4,
+            "llmErrors": 0,
+            "promptTokens": 6322,
+            "completionTokens": 15889,
+            "tokensPerExpense": 555,
+            "promptTokensPerExpense": 158,
+            "latencyMsMean": 841
+          },
+          "byWeek": [
+            {
+              "expenses": 10,
+              "firstTryExact": 7,
+              "firstTryExactPct": 70,
+              "corrections": 4,
+              "correctionsPer10": 4,
+              "misallocatedUsd": "31.09",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 4,
+              "llmErrors": 0,
+              "promptTokens": 6322,
+              "completionTokens": 15889,
+              "tokensPerExpense": 2221,
+              "promptTokensPerExpense": 632,
+              "latencyMsMean": 3243
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 41
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 51
+            },
+            {
+              "expenses": 10,
+              "firstTryExact": 10,
+              "firstTryExactPct": 100,
+              "corrections": 0,
+              "correctionsPer10": 0,
+              "misallocatedUsd": "0.00",
+              "unresolved": 0,
+              "invalidFirst": 0,
+              "oneOffFixes": 0,
+              "llmCalls": 0,
+              "llmErrors": 0,
+              "promptTokens": 0,
+              "completionTokens": 0,
+              "tokensPerExpense": 0,
+              "promptTokensPerExpense": 0,
+              "latencyMsMean": 30
+            }
+          ]
+        }
+      }
+    }
+  },
+  "records": [
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 0,
+      "expenseId": "flat-01",
+      "description": "Burger night",
+      "category": "dinner",
+      "total": "53.160000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "16.665834",
+        "ben": "16.665833",
+        "clara": "3.162500",
+        "dan": "16.665833"
+      },
+      "first": {
+        "shares": {
+          "ana": "13.290000",
+          "ben": "13.290000",
+          "clara": "13.290000",
+          "dan": "13.290000"
+        },
+        "exact": false,
+        "misallocated": "10.127500"
+      },
+      "corrections": [
+        {
+          "ruleId": "flat.clara-no-meat",
+          "text": "Leave Clara out of anything with meat.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Clara doesn't eat meat.",
+              "rule": {
+                "v": 1,
+                "id": "q000003",
+                "learnedAt": "2026-10-06T13:23:00.000Z",
+                "when": {
+                  "tags": [
+                    "meat"
+                  ]
+                },
+                "kind": "exclude",
+                "member": "clara"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1593,
+        "completion": 581
+      },
+      "latencyMs": 3487
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 1,
+      "expenseId": "flat-02",
+      "description": "Drinks at Zeitgeist",
+      "category": "drinks",
+      "total": "68.040000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "5.870000",
+        "ben": "20.723334",
+        "clara": "20.723333",
+        "dan": "20.723333"
+      },
+      "first": {
+        "shares": {
+          "ana": "17.010000",
+          "ben": "17.010000",
+          "clara": "17.010000",
+          "dan": "17.010000"
+        },
+        "exact": false,
+        "misallocated": "11.140000"
+      },
+      "corrections": [
+        {
+          "ruleId": "flat.ana-no-alcohol",
+          "text": "Ana’s teetotal, take the booze off her share.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Ana doesn't drink.",
+              "rule": {
+                "v": 1,
+                "id": "q000009",
+                "learnedAt": "2026-10-07T13:08:00.000Z",
+                "when": {
+                  "tags": [
+                    "alcohol"
+                  ]
+                },
+                "kind": "exclude",
+                "member": "ana"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1559,
+        "completion": 1350
+      },
+      "latencyMs": 3258
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 2,
+      "expenseId": "flat-03",
+      "description": "Uber to the party",
+      "category": "taxi",
+      "total": "37.830000",
+      "rules": [
+        "flat.ben-covers-taxis"
+      ],
+      "truth": {
+        "ben": "37.830000",
+        "clara": "0.000000",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ben": "12.610000",
+          "clara": "12.610000",
+          "dan": "12.610000"
+        },
+        "exact": false,
+        "misallocated": "25.220000"
+      },
+      "corrections": [
+        {
+          "ruleId": "flat.ben-covers-taxis",
+          "text": "Ben always pays for the taxis himself.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Ben always pays for the taxis himself.",
+              "rule": {
+                "v": 1,
+                "id": "q000015",
+                "learnedAt": "2026-10-07T18:23:00.000Z",
+                "when": {
+                  "category": [
+                    "taxi"
+                  ]
+                },
+                "kind": "covers",
+                "member": "ben"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1536,
+        "completion": 1445
+      },
+      "latencyMs": 3684
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 3,
+      "expenseId": "flat-04",
+      "description": "Rent, week 1",
+      "category": "rent",
+      "total": "1040.000000",
+      "rules": [
+        "flat.rent-by-room"
+      ],
+      "truth": {
+        "ana": "416.000000",
+        "ben": "208.000000",
+        "clara": "208.000000",
+        "dan": "208.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "260.000000",
+          "ben": "260.000000",
+          "clara": "260.000000",
+          "dan": "260.000000"
+        },
+        "exact": false,
+        "misallocated": "156.000000"
+      },
+      "corrections": [
+        {
+          "ruleId": "flat.rent-by-room",
+          "text": "Ana has the big room, so she pays double what each of the others pays on rent.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Ana has the big room, so she pays double what each of the others pays on rent.",
+              "rule": {
+                "v": 1,
+                "id": "q000021",
+                "learnedAt": "2026-10-08T11:26:00.000Z",
+                "when": {
+                  "category": [
+                    "rent"
+                  ]
+                },
+                "kind": "weights",
+                "weights": {
+                  "ana": 2,
+                  "ben": 1,
+                  "dan": 1,
+                  "clara": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1610,
+        "completion": 527
+      },
+      "latencyMs": 1474
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 4,
+      "expenseId": "flat-05",
+      "description": "Costco run",
+      "category": "groceries",
+      "total": "215.640000",
+      "rules": [
+        "flat.ana-no-alcohol",
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "49.899167",
+        "ben": "57.702501",
+        "clara": "50.335833",
+        "dan": "57.702499"
+      },
+      "first": {
+        "shares": {
+          "ana": "49.899167",
+          "ben": "57.702501",
+          "clara": "50.335833",
+          "dan": "57.702499"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 5,
+      "expenseId": "flat-06",
+      "description": "Netflix",
+      "category": "subscription",
+      "total": "22.990000",
+      "rules": [
+        "flat.dan-no-subscriptions"
+      ],
+      "truth": {
+        "ana": "7.663334",
+        "ben": "7.663333",
+        "clara": "7.663333",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "5.747500",
+          "ben": "5.747500",
+          "clara": "5.747500",
+          "dan": "5.747500"
+        },
+        "exact": false,
+        "misallocated": "5.747500"
+      },
+      "corrections": [
+        {
+          "ruleId": "flat.dan-no-subscriptions",
+          "text": "Dan never signed up for these subscriptions, he shouldn’t pay.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Dan doesn't pay for subscriptions.",
+              "rule": {
+                "v": 1,
+                "id": "q000029",
+                "learnedAt": "2026-10-09T12:58:00.000Z",
+                "when": {
+                  "category": [
+                    "subscription"
+                  ]
+                },
+                "kind": "exclude",
+                "member": "dan"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1546,
+        "completion": 2766
+      },
+      "latencyMs": 6442
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 6,
+      "expenseId": "flat-07",
+      "description": "Aldi",
+      "category": "groceries",
+      "total": "77.660000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "20.382500",
+        "ben": "20.382500",
+        "clara": "16.512500",
+        "dan": "20.382500"
+      },
+      "first": {
+        "shares": {
+          "ana": "20.382500",
+          "ben": "20.382500",
+          "clara": "16.512500",
+          "dan": "20.382500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 7,
+      "expenseId": "flat-08",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "72.780000",
+      "rules": [
+        "flat.ana-no-alcohol",
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "14.910000",
+        "ben": "20.620000",
+        "clara": "16.630000",
+        "dan": "20.620000"
+      },
+      "first": {
+        "shares": {
+          "ana": "14.910000",
+          "ben": "20.620000",
+          "clara": "16.630000",
+          "dan": "20.620000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 8,
+      "expenseId": "flat-09",
+      "description": "Dinner at Delfina",
+      "category": "dinner",
+      "total": "132.900000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "19.255000",
+        "ben": "37.881667",
+        "clara": "37.881667",
+        "dan": "37.881666"
+      },
+      "first": {
+        "shares": {
+          "ana": "19.255000",
+          "ben": "37.881667",
+          "clara": "37.881667",
+          "dan": "37.881666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 1,
+      "n": 9,
+      "expenseId": "flat-10",
+      "description": "Cleaning supplies",
+      "category": "other",
+      "total": "13.670000",
+      "rules": [],
+      "truth": {
+        "ana": "3.417500",
+        "ben": "3.417500",
+        "clara": "3.417500",
+        "dan": "3.417500"
+      },
+      "first": {
+        "shares": {
+          "ana": "3.417500",
+          "ben": "3.417500",
+          "clara": "3.417500",
+          "dan": "3.417500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 10,
+      "expenseId": "flat-11",
+      "description": "Dinner at Delfina",
+      "category": "dinner",
+      "total": "113.630000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "31.390000",
+        "ben": "31.390000",
+        "clara": "19.460000",
+        "dan": "31.390000"
+      },
+      "first": {
+        "shares": {
+          "ana": "31.390000",
+          "ben": "31.390000",
+          "clara": "19.460000",
+          "dan": "31.390000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 11,
+      "expenseId": "flat-12",
+      "description": "Spotify Family",
+      "category": "subscription",
+      "total": "19.990000",
+      "rules": [
+        "flat.dan-no-subscriptions"
+      ],
+      "truth": {
+        "ana": "6.663334",
+        "ben": "6.663333",
+        "clara": "6.663333",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "6.663334",
+          "ben": "6.663333",
+          "clara": "6.663333",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 12,
+      "expenseId": "flat-13",
+      "description": "Trader Joe's",
+      "category": "groceries",
+      "total": "38.500000",
+      "rules": [],
+      "truth": {
+        "ana": "9.625000",
+        "ben": "9.625000",
+        "clara": "9.625000",
+        "dan": "9.625000"
+      },
+      "first": {
+        "shares": {
+          "ana": "9.625000",
+          "ben": "9.625000",
+          "clara": "9.625000",
+          "dan": "9.625000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 13,
+      "expenseId": "flat-14",
+      "description": "Dinner at Nopa",
+      "category": "dinner",
+      "total": "101.880000",
+      "rules": [],
+      "truth": {
+        "ana": "25.470000",
+        "ben": "25.470000",
+        "clara": "25.470000",
+        "dan": "25.470000"
+      },
+      "first": {
+        "shares": {
+          "ana": "25.470000",
+          "ben": "25.470000",
+          "clara": "25.470000",
+          "dan": "25.470000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 14,
+      "expenseId": "flat-15",
+      "description": "Uber home",
+      "category": "taxi",
+      "total": "23.420000",
+      "rules": [
+        "flat.ben-covers-taxis"
+      ],
+      "truth": {
+        "ana": "0.000000",
+        "ben": "23.420000",
+        "clara": "0.000000",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "0.000000",
+          "ben": "23.420000",
+          "clara": "0.000000",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 15,
+      "expenseId": "flat-16",
+      "description": "Rent, week 2",
+      "category": "rent",
+      "total": "1040.000000",
+      "rules": [
+        "flat.rent-by-room"
+      ],
+      "truth": {
+        "ana": "416.000000",
+        "ben": "208.000000",
+        "clara": "208.000000",
+        "dan": "208.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "416.000000",
+          "ben": "208.000000",
+          "clara": "208.000000",
+          "dan": "208.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 16,
+      "expenseId": "flat-17",
+      "description": "Drinks at The Owl",
+      "category": "drinks",
+      "total": "45.870000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "2.812500",
+        "ben": "14.352500",
+        "clara": "14.352500",
+        "dan": "14.352500"
+      },
+      "first": {
+        "shares": {
+          "ana": "2.812500",
+          "ben": "14.352500",
+          "clara": "14.352500",
+          "dan": "14.352500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 17,
+      "expenseId": "flat-18",
+      "description": "Aldi",
+      "category": "groceries",
+      "total": "93.160000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "23.750000",
+        "ben": "23.750000",
+        "clara": "21.910000",
+        "dan": "23.750000"
+      },
+      "first": {
+        "shares": {
+          "ana": "23.750000",
+          "ben": "23.750000",
+          "clara": "21.910000",
+          "dan": "23.750000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 18,
+      "expenseId": "flat-19",
+      "description": "Costco run",
+      "category": "groceries",
+      "total": "147.380000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "38.630834",
+        "ben": "38.630833",
+        "clara": "31.487500",
+        "dan": "38.630833"
+      },
+      "first": {
+        "shares": {
+          "ana": "38.630834",
+          "ben": "38.630833",
+          "clara": "31.487500",
+          "dan": "38.630833"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 2,
+      "n": 19,
+      "expenseId": "flat-20",
+      "description": "Sushi delivery",
+      "category": "dinner",
+      "total": "48.990000",
+      "rules": [],
+      "truth": {
+        "ana": "16.330000",
+        "ben": "16.330000",
+        "dan": "16.330000"
+      },
+      "first": {
+        "shares": {
+          "ana": "16.330000",
+          "ben": "16.330000",
+          "dan": "16.330000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 20,
+      "expenseId": "flat-21",
+      "description": "Costco run",
+      "category": "groceries",
+      "total": "156.420000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "40.659167",
+        "ben": "40.659167",
+        "clara": "34.442500",
+        "dan": "40.659166"
+      },
+      "first": {
+        "shares": {
+          "ana": "40.659167",
+          "ben": "40.659167",
+          "clara": "34.442500",
+          "dan": "40.659166"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 21,
+      "expenseId": "flat-22",
+      "description": "New shower curtain",
+      "category": "other",
+      "total": "33.510000",
+      "rules": [],
+      "truth": {
+        "ana": "8.377500",
+        "ben": "8.377500",
+        "clara": "8.377500",
+        "dan": "8.377500"
+      },
+      "first": {
+        "shares": {
+          "ana": "8.377500",
+          "ben": "8.377500",
+          "clara": "8.377500",
+          "dan": "8.377500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 22,
+      "expenseId": "flat-23",
+      "description": "Disney+",
+      "category": "subscription",
+      "total": "15.990000",
+      "rules": [
+        "flat.dan-no-subscriptions"
+      ],
+      "truth": {
+        "ana": "5.330000",
+        "ben": "5.330000",
+        "clara": "5.330000",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "5.330000",
+          "ben": "5.330000",
+          "clara": "5.330000",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 15
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 23,
+      "expenseId": "flat-24",
+      "description": "Sushi delivery",
+      "category": "dinner",
+      "total": "48.060000",
+      "rules": [],
+      "truth": {
+        "ana": "12.015000",
+        "ben": "12.015000",
+        "clara": "12.015000",
+        "dan": "12.015000"
+      },
+      "first": {
+        "shares": {
+          "ana": "12.015000",
+          "ben": "12.015000",
+          "clara": "12.015000",
+          "dan": "12.015000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 24,
+      "expenseId": "flat-25",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "100.190000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "25.985834",
+        "ben": "25.985833",
+        "clara": "22.232500",
+        "dan": "25.985833"
+      },
+      "first": {
+        "shares": {
+          "ana": "25.985834",
+          "ben": "25.985833",
+          "clara": "22.232500",
+          "dan": "25.985833"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 15
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 25,
+      "expenseId": "flat-26",
+      "description": "Drinks at Zeitgeist",
+      "category": "drinks",
+      "total": "65.990000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "6.087500",
+        "ben": "19.967500",
+        "clara": "19.967500",
+        "dan": "19.967500"
+      },
+      "first": {
+        "shares": {
+          "ana": "6.087500",
+          "ben": "19.967500",
+          "clara": "19.967500",
+          "dan": "19.967500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 26,
+      "expenseId": "flat-27",
+      "description": "Internet",
+      "category": "utilities",
+      "total": "75.000000",
+      "rules": [],
+      "truth": {
+        "ana": "18.750000",
+        "ben": "18.750000",
+        "clara": "18.750000",
+        "dan": "18.750000"
+      },
+      "first": {
+        "shares": {
+          "ana": "18.750000",
+          "ben": "18.750000",
+          "clara": "18.750000",
+          "dan": "18.750000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 27,
+      "expenseId": "flat-28",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "56.310000",
+      "rules": [],
+      "truth": {
+        "ana": "18.770000",
+        "ben": "18.770000",
+        "clara": "18.770000"
+      },
+      "first": {
+        "shares": {
+          "ana": "18.770000",
+          "ben": "18.770000",
+          "clara": "18.770000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 28,
+      "expenseId": "flat-29",
+      "description": "Rent, week 3",
+      "category": "rent",
+      "total": "1040.000000",
+      "rules": [
+        "flat.rent-by-room"
+      ],
+      "truth": {
+        "ana": "416.000000",
+        "ben": "208.000000",
+        "clara": "208.000000",
+        "dan": "208.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "416.000000",
+          "ben": "208.000000",
+          "clara": "208.000000",
+          "dan": "208.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 3,
+      "n": 29,
+      "expenseId": "flat-30",
+      "description": "Cab after the concert",
+      "category": "taxi",
+      "total": "29.410000",
+      "rules": [
+        "flat.ben-covers-taxis"
+      ],
+      "truth": {
+        "ana": "0.000000",
+        "ben": "29.410000",
+        "clara": "0.000000",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "0.000000",
+          "ben": "29.410000",
+          "clara": "0.000000",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 30,
+      "expenseId": "flat-31",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "52.520000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "12.666667",
+        "ben": "19.926667",
+        "dan": "19.926666"
+      },
+      "first": {
+        "shares": {
+          "ana": "12.666667",
+          "ben": "19.926667",
+          "dan": "19.926666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 31,
+      "expenseId": "flat-32",
+      "description": "Costco run",
+      "category": "groceries",
+      "total": "163.690000",
+      "rules": [
+        "flat.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "43.461667",
+        "ben": "43.461667",
+        "clara": "33.305000",
+        "dan": "43.461666"
+      },
+      "first": {
+        "shares": {
+          "ana": "43.461667",
+          "ben": "43.461667",
+          "clara": "33.305000",
+          "dan": "43.461666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 32,
+      "expenseId": "flat-33",
+      "description": "Burger night",
+      "category": "dinner",
+      "total": "50.450000",
+      "rules": [],
+      "truth": {
+        "ana": "16.816667",
+        "ben": "16.816667",
+        "dan": "16.816666"
+      },
+      "first": {
+        "shares": {
+          "ana": "16.816667",
+          "ben": "16.816667",
+          "dan": "16.816666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 33,
+      "expenseId": "flat-34",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "61.880000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "11.842500",
+        "ben": "16.679167",
+        "clara": "16.679167",
+        "dan": "16.679166"
+      },
+      "first": {
+        "shares": {
+          "ana": "11.842500",
+          "ben": "16.679167",
+          "clara": "16.679167",
+          "dan": "16.679166"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 11
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 34,
+      "expenseId": "flat-35",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "63.490000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "12.340000",
+        "ben": "17.050000",
+        "clara": "17.050000",
+        "dan": "17.050000"
+      },
+      "first": {
+        "shares": {
+          "ana": "12.340000",
+          "ben": "17.050000",
+          "clara": "17.050000",
+          "dan": "17.050000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 35,
+      "expenseId": "flat-36",
+      "description": "Rent, week 4",
+      "category": "rent",
+      "total": "1040.000000",
+      "rules": [
+        "flat.rent-by-room"
+      ],
+      "truth": {
+        "ana": "416.000000",
+        "ben": "208.000000",
+        "clara": "208.000000",
+        "dan": "208.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "416.000000",
+          "ben": "208.000000",
+          "clara": "208.000000",
+          "dan": "208.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 36,
+      "expenseId": "flat-37",
+      "description": "Lyft to the airport",
+      "category": "taxi",
+      "total": "29.640000",
+      "rules": [
+        "flat.ben-covers-taxis"
+      ],
+      "truth": {
+        "ana": "0.000000",
+        "ben": "29.640000",
+        "clara": "0.000000",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "0.000000",
+          "ben": "29.640000",
+          "clara": "0.000000",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 37,
+      "expenseId": "flat-38",
+      "description": "Max",
+      "category": "subscription",
+      "total": "16.990000",
+      "rules": [
+        "flat.dan-no-subscriptions"
+      ],
+      "truth": {
+        "ana": "5.663334",
+        "ben": "5.663333",
+        "clara": "5.663333",
+        "dan": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "5.663334",
+          "ben": "5.663333",
+          "clara": "5.663333",
+          "dan": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 11
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 38,
+      "expenseId": "flat-39",
+      "description": "Drinks at The Page",
+      "category": "drinks",
+      "total": "75.300000",
+      "rules": [
+        "flat.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "3.450000",
+        "ben": "35.925000",
+        "dan": "35.925000"
+      },
+      "first": {
+        "shares": {
+          "ana": "3.450000",
+          "ben": "35.925000",
+          "dan": "35.925000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "flat",
+      "week": 4,
+      "n": 39,
+      "expenseId": "flat-40",
+      "description": "Internet",
+      "category": "utilities",
+      "total": "75.000000",
+      "rules": [],
+      "truth": {
+        "ana": "18.750000",
+        "ben": "18.750000",
+        "clara": "18.750000",
+        "dan": "18.750000"
+      },
+      "first": {
+        "shares": {
+          "ana": "18.750000",
+          "ben": "18.750000",
+          "clara": "18.750000",
+          "dan": "18.750000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 12
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 0,
+      "expenseId": "trip-01",
+      "description": "Petrol, Shell on the A40",
+      "category": "fuel",
+      "total": "88.800000",
+      "rules": [
+        "trip.car-pays-fuel"
+      ],
+      "truth": {
+        "ana": "29.600000",
+        "ben": "29.600000",
+        "clara": "29.600000",
+        "dan": "0.000000",
+        "eve": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "17.760000",
+          "ben": "17.760000",
+          "clara": "17.760000",
+          "dan": "17.760000",
+          "eve": "17.760000"
+        },
+        "exact": false,
+        "misallocated": "35.520000"
+      },
+      "corrections": [
+        {
+          "ruleId": "trip.car-pays-fuel",
+          "text": "Split the fuel between Ana, Ben and Clara, they’re the ones in the car.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Only Ana, Ben, and Clara split fuel.",
+              "rule": {
+                "v": 1,
+                "id": "q000003",
+                "learnedAt": "2026-10-05T11:20:00.000Z",
+                "when": {
+                  "category": [
+                    "fuel"
+                  ]
+                },
+                "kind": "only",
+                "members": [
+                  "ana",
+                  "ben",
+                  "clara"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1559,
+        "completion": 1655
+      },
+      "latencyMs": 4778
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 1,
+      "expenseId": "trip-02",
+      "description": "Trattoria al Ponte",
+      "category": "dinner",
+      "total": "99.090000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "14.142000",
+        "ben": "21.237000",
+        "clara": "21.237000",
+        "dan": "21.237000",
+        "eve": "21.237000"
+      },
+      "first": {
+        "shares": {
+          "ana": "19.818000",
+          "ben": "19.818000",
+          "clara": "19.818000",
+          "dan": "19.818000",
+          "eve": "19.818000"
+        },
+        "exact": false,
+        "misallocated": "5.676000"
+      },
+      "corrections": [
+        {
+          "ruleId": "trip.ana-no-alcohol",
+          "text": "Ana doesn’t drink, leave her out of the alcohol.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Ana doesn't drink.",
+              "rule": {
+                "v": 1,
+                "id": "q000009",
+                "learnedAt": "2026-10-05T14:47:00.000Z",
+                "when": {
+                  "tags": [
+                    "alcohol"
+                  ]
+                },
+                "kind": "exclude",
+                "member": "ana"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1586,
+        "completion": 791
+      },
+      "latencyMs": 1994
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 2,
+      "expenseId": "trip-03",
+      "description": "Spar",
+      "category": "groceries",
+      "total": "67.440000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "13.986500",
+        "ben": "13.986500",
+        "clara": "11.494000",
+        "dan": "13.986500",
+        "eve": "13.986500"
+      },
+      "first": {
+        "shares": {
+          "ana": "13.488000",
+          "ben": "13.488000",
+          "clara": "13.488000",
+          "dan": "13.488000",
+          "eve": "13.488000"
+        },
+        "exact": false,
+        "misallocated": "1.994000"
+      },
+      "corrections": [
+        {
+          "ruleId": "trip.clara-no-meat",
+          "text": "Clara doesn’t eat meat, she shouldn’t pay for it.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Clara doesn't eat meat.",
+              "rule": {
+                "v": 1,
+                "id": "q000015",
+                "learnedAt": "2026-10-05T19:59:00.000Z",
+                "when": {
+                  "tags": [
+                    "meat"
+                  ]
+                },
+                "kind": "exclude",
+                "member": "clara"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1607,
+        "completion": 515
+      },
+      "latencyMs": 1608
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 3,
+      "expenseId": "trip-04",
+      "description": "Après-ski at Le Privé",
+      "category": "drinks",
+      "total": "82.450000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "3.316000",
+        "ben": "19.783500",
+        "clara": "19.783500",
+        "dan": "19.783500",
+        "eve": "19.783500"
+      },
+      "first": {
+        "shares": {
+          "ana": "3.316000",
+          "ben": "19.783500",
+          "clara": "19.783500",
+          "dan": "19.783500",
+          "eve": "19.783500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 4,
+      "expenseId": "trip-05",
+      "description": "Coop",
+      "category": "groceries",
+      "total": "86.380000",
+      "rules": [
+        "trip.ana-no-alcohol",
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "19.253334",
+        "ben": "23.510000",
+        "clara": "20.106667",
+        "eve": "23.509999"
+      },
+      "first": {
+        "shares": {
+          "ana": "19.253334",
+          "ben": "23.510000",
+          "clara": "20.106667",
+          "eve": "23.509999"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 27
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 5,
+      "expenseId": "trip-06",
+      "description": "Gasthof Post",
+      "category": "dinner",
+      "total": "132.870000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "28.911000",
+        "ben": "28.911000",
+        "clara": "17.226000",
+        "dan": "28.911000",
+        "eve": "28.911000"
+      },
+      "first": {
+        "shares": {
+          "ana": "28.911000",
+          "ben": "28.911000",
+          "clara": "17.226000",
+          "dan": "28.911000",
+          "eve": "28.911000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 25
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 6,
+      "expenseId": "trip-07",
+      "description": "Ski day at Les Grands Montets",
+      "category": "activity",
+      "total": "255.500000",
+      "rules": [
+        "trip.skiers-pay-ski"
+      ],
+      "truth": {
+        "ben": "79.522500",
+        "clara": "16.932500",
+        "dan": "79.522500",
+        "eve": "79.522500"
+      },
+      "first": {
+        "shares": {
+          "ben": "63.875000",
+          "clara": "63.875000",
+          "dan": "63.875000",
+          "eve": "63.875000"
+        },
+        "exact": false,
+        "misallocated": "46.942500"
+      },
+      "corrections": [
+        {
+          "ruleId": "trip.skiers-pay-ski",
+          "text": "Only Ben, Dan and Eve ski, so the ski stuff is just on them.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Only Ben, Dan and Eve ski, so ski stuff is just on them.",
+              "rule": {
+                "v": 1,
+                "id": "q000027",
+                "learnedAt": "2026-10-09T15:16:00.000Z",
+                "when": {
+                  "tags": [
+                    "ski"
+                  ]
+                },
+                "kind": "only",
+                "members": [
+                  "ben",
+                  "dan",
+                  "eve"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1628,
+        "completion": 4611
+      },
+      "latencyMs": 9785
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 7,
+      "expenseId": "trip-08",
+      "description": "Airbnb in Chamonix, 3 nights",
+      "category": "accommodation",
+      "total": "643.880000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "214.626667",
+        "ben": "107.313334",
+        "clara": "107.313333",
+        "dan": "107.313333",
+        "eve": "107.313333"
+      },
+      "first": {
+        "shares": {
+          "ana": "128.776000",
+          "ben": "128.776000",
+          "clara": "128.776000",
+          "dan": "128.776000",
+          "eve": "128.776000"
+        },
+        "exact": false,
+        "misallocated": "85.850667"
+      },
+      "corrections": [
+        {
+          "ruleId": "trip.ana-double-lodging",
+          "text": "Ana pays two shares of every place we stay, the rest of us one each.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Ana pays two shares of every place we stay, the rest of us one each.",
+              "rule": {
+                "v": 1,
+                "id": "q000033",
+                "learnedAt": "2026-10-10T15:12:00.000Z",
+                "when": {
+                  "category": [
+                    "accommodation"
+                  ]
+                },
+                "kind": "weights",
+                "weights": {
+                  "ana": 2,
+                  "ben": 1,
+                  "dan": 1,
+                  "eve": 1,
+                  "clara": 1
+                }
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1611,
+        "completion": 571
+      },
+      "latencyMs": 1656
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 8,
+      "expenseId": "trip-09",
+      "description": "Cable car ride",
+      "category": "activity",
+      "total": "103.860000",
+      "rules": [],
+      "truth": {
+        "ana": "20.772000",
+        "ben": "20.772000",
+        "clara": "20.772000",
+        "dan": "20.772000",
+        "eve": "20.772000"
+      },
+      "first": {
+        "shares": {
+          "ana": "20.772000",
+          "ben": "20.772000",
+          "clara": "20.772000",
+          "dan": "20.772000",
+          "eve": "20.772000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 23
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 1,
+      "n": 9,
+      "expenseId": "trip-10",
+      "description": "Airbnb in Chamonix, 3 nights",
+      "category": "accommodation",
+      "total": "459.090000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "153.030000",
+        "ben": "76.515000",
+        "clara": "76.515000",
+        "dan": "76.515000",
+        "eve": "76.515000"
+      },
+      "first": {
+        "shares": {
+          "ana": "153.030000",
+          "ben": "76.515000",
+          "clara": "76.515000",
+          "dan": "76.515000",
+          "eve": "76.515000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 24
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 10,
+      "expenseId": "trip-11",
+      "description": "Raclette night",
+      "category": "dinner",
+      "total": "209.840000",
+      "rules": [
+        "trip.ana-no-alcohol",
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "34.084500",
+        "ben": "46.969500",
+        "clara": "34.847000",
+        "dan": "46.969500",
+        "eve": "46.969500"
+      },
+      "first": {
+        "shares": {
+          "ana": "34.084500",
+          "ben": "46.969500",
+          "clara": "34.847000",
+          "dan": "46.969500",
+          "eve": "46.969500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 24
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 11,
+      "expenseId": "trip-12",
+      "description": "Après-ski at the Mooserwirt",
+      "category": "drinks",
+      "total": "62.650000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "4.760000",
+        "ben": "19.296667",
+        "clara": "19.296667",
+        "dan": "19.296666"
+      },
+      "first": {
+        "shares": {
+          "ana": "4.760000",
+          "ben": "19.296667",
+          "clara": "19.296667",
+          "dan": "19.296666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 12,
+      "expenseId": "trip-13",
+      "description": "Ski day at Les Grands Montets",
+      "category": "activity",
+      "total": "257.120000",
+      "rules": [
+        "trip.skiers-pay-ski"
+      ],
+      "truth": {
+        "ana": "16.348000",
+        "ben": "74.808000",
+        "clara": "16.348000",
+        "dan": "74.808000",
+        "eve": "74.808000"
+      },
+      "first": {
+        "shares": {
+          "ana": "16.348000",
+          "ben": "74.808000",
+          "clara": "16.348000",
+          "dan": "74.808000",
+          "eve": "74.808000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 16
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 13,
+      "expenseId": "trip-14",
+      "description": "Fondue at Le Chalet",
+      "category": "dinner",
+      "total": "139.980000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "17.998000",
+        "ben": "30.495500",
+        "clara": "30.495500",
+        "dan": "30.495500",
+        "eve": "30.495500"
+      },
+      "first": {
+        "shares": {
+          "ana": "17.998000",
+          "ben": "30.495500",
+          "clara": "30.495500",
+          "dan": "30.495500",
+          "eve": "30.495500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 17
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 14,
+      "expenseId": "trip-15",
+      "description": "Fuel stop, OMV",
+      "category": "fuel",
+      "total": "90.180000",
+      "rules": [
+        "trip.car-pays-fuel"
+      ],
+      "truth": {
+        "ana": "30.060000",
+        "ben": "30.060000",
+        "clara": "30.060000",
+        "dan": "0.000000",
+        "eve": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "30.060000",
+          "ben": "30.060000",
+          "clara": "30.060000",
+          "dan": "0.000000",
+          "eve": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 15,
+      "expenseId": "trip-16",
+      "description": "Airbnb in Zermatt, 4 nights",
+      "category": "accommodation",
+      "total": "551.300000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "183.766667",
+        "ben": "91.883334",
+        "clara": "91.883333",
+        "dan": "91.883333",
+        "eve": "91.883333"
+      },
+      "first": {
+        "shares": {
+          "ana": "183.766667",
+          "ben": "91.883334",
+          "clara": "91.883333",
+          "dan": "91.883333",
+          "eve": "91.883333"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 16
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 16,
+      "expenseId": "trip-17",
+      "description": "Hotel in Zermatt, 4 nights",
+      "category": "accommodation",
+      "total": "657.510000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "219.170000",
+        "ben": "109.585000",
+        "clara": "109.585000",
+        "dan": "109.585000",
+        "eve": "109.585000"
+      },
+      "first": {
+        "shares": {
+          "ana": "219.170000",
+          "ben": "109.585000",
+          "clara": "109.585000",
+          "dan": "109.585000",
+          "eve": "109.585000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 21
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 17,
+      "expenseId": "trip-18",
+      "description": "Migros",
+      "category": "groceries",
+      "total": "71.470000",
+      "rules": [],
+      "truth": {
+        "ana": "14.294000",
+        "ben": "14.294000",
+        "clara": "14.294000",
+        "dan": "14.294000",
+        "eve": "14.294000"
+      },
+      "first": {
+        "shares": {
+          "ana": "14.294000",
+          "ben": "14.294000",
+          "clara": "14.294000",
+          "dan": "14.294000",
+          "eve": "14.294000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 17
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 18,
+      "expenseId": "trip-19",
+      "description": "Ski day at Gornergrat",
+      "category": "activity",
+      "total": "249.900000",
+      "rules": [
+        "trip.skiers-pay-ski"
+      ],
+      "truth": {
+        "ana": "14.904000",
+        "ben": "73.364000",
+        "clara": "14.904000",
+        "dan": "73.364000",
+        "eve": "73.364000"
+      },
+      "first": {
+        "shares": {
+          "ana": "14.904000",
+          "ben": "73.364000",
+          "clara": "14.904000",
+          "dan": "73.364000",
+          "eve": "73.364000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 21
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 2,
+      "n": 19,
+      "expenseId": "trip-20",
+      "description": "Raclette night",
+      "category": "dinner",
+      "total": "84.350000",
+      "rules": [],
+      "truth": {
+        "ana": "21.087500",
+        "clara": "21.087500",
+        "dan": "21.087500",
+        "eve": "21.087500"
+      },
+      "first": {
+        "shares": {
+          "ana": "21.087500",
+          "clara": "21.087500",
+          "dan": "21.087500",
+          "eve": "21.087500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 27
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 20,
+      "expenseId": "trip-21",
+      "description": "Ski day at Valluga",
+      "category": "activity",
+      "total": "265.110000",
+      "rules": [
+        "trip.skiers-pay-ski"
+      ],
+      "truth": {
+        "ana": "16.746000",
+        "ben": "77.206000",
+        "clara": "16.746000",
+        "dan": "77.206000",
+        "eve": "77.206000"
+      },
+      "first": {
+        "shares": {
+          "ana": "16.746000",
+          "ben": "77.206000",
+          "clara": "16.746000",
+          "dan": "77.206000",
+          "eve": "77.206000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 21
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 21,
+      "expenseId": "trip-22",
+      "description": "Raclette night",
+      "category": "dinner",
+      "total": "163.850000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "34.303500",
+        "ben": "34.303500",
+        "clara": "26.636000",
+        "dan": "34.303500",
+        "eve": "34.303500"
+      },
+      "first": {
+        "shares": {
+          "ana": "34.303500",
+          "ben": "34.303500",
+          "clara": "26.636000",
+          "dan": "34.303500",
+          "eve": "34.303500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 19
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 22,
+      "expenseId": "trip-23",
+      "description": "Migros",
+      "category": "groceries",
+      "total": "96.080000",
+      "rules": [],
+      "truth": {
+        "ana": "19.216000",
+        "ben": "19.216000",
+        "clara": "19.216000",
+        "dan": "19.216000",
+        "eve": "19.216000"
+      },
+      "first": {
+        "shares": {
+          "ana": "19.216000",
+          "ben": "19.216000",
+          "clara": "19.216000",
+          "dan": "19.216000",
+          "eve": "19.216000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 16
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 23,
+      "expenseId": "trip-24",
+      "description": "Gasthof Post",
+      "category": "dinner",
+      "total": "218.240000",
+      "rules": [
+        "trip.ana-no-alcohol",
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "34.112000",
+        "ben": "48.554500",
+        "clara": "38.464500",
+        "dan": "48.554500",
+        "eve": "48.554500"
+      },
+      "first": {
+        "shares": {
+          "ana": "34.112000",
+          "ben": "48.554500",
+          "clara": "38.464500",
+          "dan": "48.554500",
+          "eve": "48.554500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 17
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 24,
+      "expenseId": "trip-25",
+      "description": "Fill-up, BP",
+      "category": "fuel",
+      "total": "63.640000",
+      "rules": [
+        "trip.car-pays-fuel"
+      ],
+      "truth": {
+        "ana": "21.213334",
+        "ben": "21.213333",
+        "clara": "21.213333",
+        "dan": "0.000000",
+        "eve": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "21.213334",
+          "ben": "21.213333",
+          "clara": "21.213333",
+          "dan": "0.000000",
+          "eve": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 15
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 25,
+      "expenseId": "trip-26",
+      "description": "Guesthouse in St. Anton, 3 nights",
+      "category": "accommodation",
+      "total": "690.680000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "230.226667",
+        "ben": "115.113334",
+        "clara": "115.113333",
+        "dan": "115.113333",
+        "eve": "115.113333"
+      },
+      "first": {
+        "shares": {
+          "ana": "230.226667",
+          "ben": "115.113334",
+          "clara": "115.113333",
+          "dan": "115.113333",
+          "eve": "115.113333"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 15
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 26,
+      "expenseId": "trip-27",
+      "description": "Thermal baths",
+      "category": "activity",
+      "total": "75.150000",
+      "rules": [],
+      "truth": {
+        "ana": "15.030000",
+        "ben": "15.030000",
+        "clara": "15.030000",
+        "dan": "15.030000",
+        "eve": "15.030000"
+      },
+      "first": {
+        "shares": {
+          "ana": "15.030000",
+          "ben": "15.030000",
+          "clara": "15.030000",
+          "dan": "15.030000",
+          "eve": "15.030000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 27,
+      "expenseId": "trip-28",
+      "description": "Chalet in St. Anton, 4 nights",
+      "category": "accommodation",
+      "total": "533.330000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "177.776667",
+        "ben": "88.888334",
+        "clara": "88.888333",
+        "dan": "88.888333",
+        "eve": "88.888333"
+      },
+      "first": {
+        "shares": {
+          "ana": "177.776667",
+          "ben": "88.888334",
+          "clara": "88.888333",
+          "dan": "88.888333",
+          "eve": "88.888333"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 28,
+      "expenseId": "trip-29",
+      "description": "Après-ski at Bar Lovat",
+      "category": "drinks",
+      "total": "88.990000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "4.454000",
+        "ben": "21.134000",
+        "clara": "21.134000",
+        "dan": "21.134000",
+        "eve": "21.134000"
+      },
+      "first": {
+        "shares": {
+          "ana": "4.454000",
+          "ben": "21.134000",
+          "clara": "21.134000",
+          "dan": "21.134000",
+          "eve": "21.134000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 11
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 3,
+      "n": 29,
+      "expenseId": "trip-30",
+      "description": "Trattoria al Ponte",
+      "category": "dinner",
+      "total": "195.010000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ben": "53.026667",
+        "clara": "35.930000",
+        "dan": "53.026667",
+        "eve": "53.026666"
+      },
+      "first": {
+        "shares": {
+          "ben": "53.026667",
+          "clara": "35.930000",
+          "dan": "53.026667",
+          "eve": "53.026666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 30,
+      "expenseId": "trip-31",
+      "description": "Spar",
+      "category": "groceries",
+      "total": "110.500000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "22.565500",
+        "ben": "22.565500",
+        "clara": "20.238000",
+        "dan": "22.565500",
+        "eve": "22.565500"
+      },
+      "first": {
+        "shares": {
+          "ana": "22.565500",
+          "ben": "22.565500",
+          "clara": "20.238000",
+          "dan": "22.565500",
+          "eve": "22.565500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 31,
+      "expenseId": "trip-32",
+      "description": "Après-ski at Hennu Stall",
+      "category": "drinks",
+      "total": "80.520000",
+      "rules": [
+        "trip.ana-no-alcohol"
+      ],
+      "truth": {
+        "ana": "4.312000",
+        "ben": "19.052000",
+        "clara": "19.052000",
+        "dan": "19.052000",
+        "eve": "19.052000"
+      },
+      "first": {
+        "shares": {
+          "ana": "4.312000",
+          "ben": "19.052000",
+          "clara": "19.052000",
+          "dan": "19.052000",
+          "eve": "19.052000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 13
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 32,
+      "expenseId": "trip-33",
+      "description": "Ski day at Tofana",
+      "category": "activity",
+      "total": "284.610000",
+      "rules": [
+        "trip.skiers-pay-ski"
+      ],
+      "truth": {
+        "ana": "17.016000",
+        "ben": "83.526000",
+        "clara": "17.016000",
+        "dan": "83.526000",
+        "eve": "83.526000"
+      },
+      "first": {
+        "shares": {
+          "ana": "17.016000",
+          "ben": "83.526000",
+          "clara": "17.016000",
+          "dan": "83.526000",
+          "eve": "83.526000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 33,
+      "expenseId": "trip-34",
+      "description": "Hotel in Cortina, 4 nights",
+      "category": "accommodation",
+      "total": "759.790000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "253.263333",
+        "ben": "126.631667",
+        "clara": "126.631667",
+        "dan": "126.631667",
+        "eve": "126.631666"
+      },
+      "first": {
+        "shares": {
+          "ana": "253.263333",
+          "ben": "126.631667",
+          "clara": "126.631667",
+          "dan": "126.631667",
+          "eve": "126.631666"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 34,
+      "expenseId": "trip-35",
+      "description": "Pizzeria Da Mario",
+      "category": "dinner",
+      "total": "130.410000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "28.193500",
+        "ben": "28.193500",
+        "clara": "17.636000",
+        "dan": "28.193500",
+        "eve": "28.193500"
+      },
+      "first": {
+        "shares": {
+          "ana": "28.193500",
+          "ben": "28.193500",
+          "clara": "17.636000",
+          "dan": "28.193500",
+          "eve": "28.193500"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 19
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 35,
+      "expenseId": "trip-36",
+      "description": "Petrol at Agip",
+      "category": "fuel",
+      "total": "76.450000",
+      "rules": [
+        "trip.car-pays-fuel"
+      ],
+      "truth": {
+        "ana": "25.483334",
+        "ben": "25.483333",
+        "clara": "25.483333",
+        "dan": "0.000000",
+        "eve": "0.000000"
+      },
+      "first": {
+        "shares": {
+          "ana": "25.483334",
+          "ben": "25.483333",
+          "clara": "25.483333",
+          "dan": "0.000000",
+          "eve": "0.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 36,
+      "expenseId": "trip-37",
+      "description": "Chalet in Cortina, 4 nights",
+      "category": "accommodation",
+      "total": "745.610000",
+      "rules": [
+        "trip.ana-double-lodging"
+      ],
+      "truth": {
+        "ana": "248.536667",
+        "ben": "124.268334",
+        "clara": "124.268333",
+        "dan": "124.268333",
+        "eve": "124.268333"
+      },
+      "first": {
+        "shares": {
+          "ana": "248.536667",
+          "ben": "124.268334",
+          "clara": "124.268333",
+          "dan": "124.268333",
+          "eve": "124.268333"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 19
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 37,
+      "expenseId": "trip-38",
+      "description": "Fondue at Le Chalet",
+      "category": "dinner",
+      "total": "164.800000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "34.064000",
+        "ben": "34.064000",
+        "clara": "28.544000",
+        "dan": "34.064000",
+        "eve": "34.064000"
+      },
+      "first": {
+        "shares": {
+          "ana": "34.064000",
+          "ben": "34.064000",
+          "clara": "28.544000",
+          "dan": "34.064000",
+          "eve": "34.064000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 38,
+      "expenseId": "trip-39",
+      "description": "Carrefour Market",
+      "category": "groceries",
+      "total": "48.300000",
+      "rules": [],
+      "truth": {
+        "ana": "9.660000",
+        "ben": "9.660000",
+        "clara": "9.660000",
+        "dan": "9.660000",
+        "eve": "9.660000"
+      },
+      "first": {
+        "shares": {
+          "ana": "9.660000",
+          "ben": "9.660000",
+          "clara": "9.660000",
+          "dan": "9.660000",
+          "eve": "9.660000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "trip",
+      "week": 4,
+      "n": 39,
+      "expenseId": "trip-40",
+      "description": "Pizzeria Da Mario",
+      "category": "dinner",
+      "total": "147.550000",
+      "rules": [
+        "trip.clara-no-meat"
+      ],
+      "truth": {
+        "ana": "30.765000",
+        "ben": "30.765000",
+        "clara": "24.490000",
+        "dan": "30.765000",
+        "eve": "30.765000"
+      },
+      "first": {
+        "shares": {
+          "ana": "30.765000",
+          "ben": "30.765000",
+          "clara": "24.490000",
+          "dan": "30.765000",
+          "eve": "30.765000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 14
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 0,
+      "expenseId": "couple-01",
+      "description": "Electricity",
+      "category": "utilities",
+      "total": "81.120000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "48.672000",
+        "gia": "32.448000"
+      },
+      "first": {
+        "shares": {
+          "fin": "40.560000",
+          "gia": "40.560000"
+        },
+        "exact": false,
+        "misallocated": "8.112000"
+      },
+      "corrections": [
+        {
+          "ruleId": "couple.sixty-forty",
+          "text": "It’s not half and half: Fin pays three parts for every two of Gia’s.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Fin pays three parts for every two of Gia's for utilities.",
+              "rule": {
+                "v": 1,
+                "id": "q000003",
+                "learnedAt": "2026-10-05T12:07:00.000Z",
+                "when": {
+                  "category": [
+                    "utilities"
+                  ]
+                },
+                "kind": "weights",
+                "weights": {
+                  "fin": 3,
+                  "gia": 2
+                }
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1541,
+        "completion": 1783
+      },
+      "latencyMs": 4058
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 1,
+      "expenseId": "couple-02",
+      "description": "Amazon order",
+      "category": "other",
+      "total": "69.700000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.gia-personal"
+      ],
+      "truth": {
+        "fin": "32.916000",
+        "gia": "36.784000"
+      },
+      "first": {
+        "shares": {
+          "fin": "34.850000",
+          "gia": "34.850000"
+        },
+        "exact": false,
+        "misallocated": "1.934000"
+      },
+      "corrections": [
+        {
+          "ruleId": "couple.gia-personal",
+          "text": "When Gia buys something just for herself, Fin shouldn’t pay any of it.",
+          "exactAfter": false,
+          "note": {
+            "learned": {
+              "sentence": "When Gia buys something just for herself, Fin shouldn't pay any of it.",
+              "rule": {
+                "v": 1,
+                "id": "q000009",
+                "learnedAt": "2026-10-05T17:54:00.000Z",
+                "when": {
+                  "tags": [
+                    "personal"
+                  ],
+                  "payer": "gia"
+                },
+                "kind": "payerCovers"
+              }
+            }
+          }
+        },
+        {
+          "ruleId": "couple.sixty-forty",
+          "text": "We split everything 60/40, Fin pays the bigger part.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "We split everything 60/40, Fin pays the bigger part.",
+              "rule": {
+                "v": 1,
+                "id": "q000013",
+                "learnedAt": "2026-10-05T17:55:00.000Z",
+                "when": {},
+                "kind": "weights",
+                "weights": {
+                  "fin": 60,
+                  "gia": 40
+                }
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 2,
+        "errors": 0,
+        "prompt": 3197,
+        "completion": 9840
+      },
+      "latencyMs": 19829
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 2,
+      "expenseId": "couple-03",
+      "description": "Target run",
+      "category": "other",
+      "total": "92.020000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "76.264000",
+        "gia": "15.756000"
+      },
+      "first": {
+        "shares": {
+          "fin": "55.212000",
+          "gia": "36.808000"
+        },
+        "exact": false,
+        "misallocated": "21.052000"
+      },
+      "corrections": [
+        {
+          "ruleId": "couple.fin-personal",
+          "text": "Fin bought that for himself, his personal things are on him.",
+          "exactAfter": true,
+          "note": {
+            "learned": {
+              "sentence": "Personal stuff is on whoever bought it.",
+              "rule": {
+                "v": 1,
+                "id": "q000019",
+                "learnedAt": "2026-10-06T14:16:00.000Z",
+                "when": {
+                  "tags": [
+                    "personal"
+                  ]
+                },
+                "kind": "payerCovers"
+              }
+            }
+          }
+        }
+      ],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 1,
+        "errors": 0,
+        "prompt": 1584,
+        "completion": 4266
+      },
+      "latencyMs": 8354
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 3,
+      "expenseId": "couple-04",
+      "description": "Ramen takeout",
+      "category": "dinner",
+      "total": "54.160000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "32.496000",
+        "gia": "21.664000"
+      },
+      "first": {
+        "shares": {
+          "fin": "32.496000",
+          "gia": "21.664000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 17
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 4,
+      "expenseId": "couple-05",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "67.130000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "40.278000",
+        "gia": "26.852000"
+      },
+      "first": {
+        "shares": {
+          "fin": "40.278000",
+          "gia": "26.852000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 5,
+      "expenseId": "couple-06",
+      "description": "Farmers market",
+      "category": "groceries",
+      "total": "35.070000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "21.042000",
+        "gia": "14.028000"
+      },
+      "first": {
+        "shares": {
+          "fin": "21.042000",
+          "gia": "14.028000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 6,
+      "expenseId": "couple-07",
+      "description": "Dinner at La Taqueria",
+      "category": "dinner",
+      "total": "78.810000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "47.286000",
+        "gia": "31.524000"
+      },
+      "first": {
+        "shares": {
+          "fin": "47.286000",
+          "gia": "31.524000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 22
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 7,
+      "expenseId": "couple-08",
+      "description": "Dinner at Flour + Water",
+      "category": "dinner",
+      "total": "97.460000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "58.476000",
+        "gia": "38.984000"
+      },
+      "first": {
+        "shares": {
+          "fin": "58.476000",
+          "gia": "38.984000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 19
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 8,
+      "expenseId": "couple-09",
+      "description": "CVS",
+      "category": "other",
+      "total": "13.830000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "8.298000",
+        "gia": "5.532000"
+      },
+      "first": {
+        "shares": {
+          "fin": "8.298000",
+          "gia": "5.532000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 50
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 1,
+      "n": 9,
+      "expenseId": "couple-10",
+      "description": "October rent",
+      "category": "rent",
+      "total": "2600.000000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "1560.000000",
+        "gia": "1040.000000"
+      },
+      "first": {
+        "shares": {
+          "fin": "1560.000000",
+          "gia": "1040.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 49
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 10,
+      "expenseId": "couple-11",
+      "description": "Amazon order",
+      "category": "other",
+      "total": "108.000000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.gia-personal"
+      ],
+      "truth": {
+        "fin": "19.188000",
+        "gia": "88.812000"
+      },
+      "first": {
+        "shares": {
+          "fin": "19.188000",
+          "gia": "88.812000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 47
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 11,
+      "expenseId": "couple-12",
+      "description": "Ramen takeout",
+      "category": "dinner",
+      "total": "33.700000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "20.220000",
+        "gia": "13.480000"
+      },
+      "first": {
+        "shares": {
+          "fin": "20.220000",
+          "gia": "13.480000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 41
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 12,
+      "expenseId": "couple-13",
+      "description": "Coffee and pastries",
+      "category": "other",
+      "total": "10.480000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "6.288000",
+        "gia": "4.192000"
+      },
+      "first": {
+        "shares": {
+          "fin": "6.288000",
+          "gia": "4.192000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 23
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 13,
+      "expenseId": "couple-14",
+      "description": "Lyft to brunch",
+      "category": "taxi",
+      "total": "28.080000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "16.848000",
+        "gia": "11.232000"
+      },
+      "first": {
+        "shares": {
+          "fin": "16.848000",
+          "gia": "11.232000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 56
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 14,
+      "expenseId": "couple-15",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "118.650000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "71.190000",
+        "gia": "47.460000"
+      },
+      "first": {
+        "shares": {
+          "fin": "71.190000",
+          "gia": "47.460000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 66
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 15,
+      "expenseId": "couple-16",
+      "description": "Whole Foods",
+      "category": "groceries",
+      "total": "56.510000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "41.706000",
+        "gia": "14.804000"
+      },
+      "first": {
+        "shares": {
+          "fin": "41.706000",
+          "gia": "14.804000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 42
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 16,
+      "expenseId": "couple-17",
+      "description": "Walgreens",
+      "category": "other",
+      "total": "44.850000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.gia-personal"
+      ],
+      "truth": {
+        "fin": "8.424000",
+        "gia": "36.426000"
+      },
+      "first": {
+        "shares": {
+          "fin": "8.424000",
+          "gia": "36.426000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 41
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 17,
+      "expenseId": "couple-18",
+      "description": "Dinner at Kin Khao",
+      "category": "dinner",
+      "total": "92.580000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "55.548000",
+        "gia": "37.032000"
+      },
+      "first": {
+        "shares": {
+          "fin": "55.548000",
+          "gia": "37.032000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 43
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 18,
+      "expenseId": "couple-19",
+      "description": "Amazon order",
+      "category": "other",
+      "total": "109.550000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "93.714000",
+        "gia": "15.836000"
+      },
+      "first": {
+        "shares": {
+          "fin": "93.714000",
+          "gia": "15.836000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 21
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 2,
+      "n": 19,
+      "expenseId": "couple-20",
+      "description": "Netflix",
+      "category": "subscription",
+      "total": "15.490000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "9.294000",
+        "gia": "6.196000"
+      },
+      "first": {
+        "shares": {
+          "fin": "9.294000",
+          "gia": "6.196000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 28
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 20,
+      "expenseId": "couple-21",
+      "description": "Movie tickets",
+      "category": "activity",
+      "total": "24.390000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "14.634000",
+        "gia": "9.756000"
+      },
+      "first": {
+        "shares": {
+          "fin": "14.634000",
+          "gia": "9.756000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 54
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 21,
+      "expenseId": "couple-22",
+      "description": "Movie tickets",
+      "category": "activity",
+      "total": "24.370000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "14.622000",
+        "gia": "9.748000"
+      },
+      "first": {
+        "shares": {
+          "fin": "14.622000",
+          "gia": "9.748000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 105
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 22,
+      "expenseId": "couple-23",
+      "description": "Target run",
+      "category": "other",
+      "total": "68.240000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.gia-personal"
+      ],
+      "truth": {
+        "fin": "22.782000",
+        "gia": "45.458000"
+      },
+      "first": {
+        "shares": {
+          "fin": "22.782000",
+          "gia": "45.458000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 43
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 23,
+      "expenseId": "couple-24",
+      "description": "Walgreens",
+      "category": "other",
+      "total": "21.830000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "13.098000",
+        "gia": "8.732000"
+      },
+      "first": {
+        "shares": {
+          "fin": "13.098000",
+          "gia": "8.732000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 35
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 24,
+      "expenseId": "couple-25",
+      "description": "Poke bowls",
+      "category": "dinner",
+      "total": "44.640000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "26.784000",
+        "gia": "17.856000"
+      },
+      "first": {
+        "shares": {
+          "fin": "26.784000",
+          "gia": "17.856000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 20
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 25,
+      "expenseId": "couple-26",
+      "description": "Target run",
+      "category": "other",
+      "total": "65.190000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "53.086000",
+        "gia": "12.104000"
+      },
+      "first": {
+        "shares": {
+          "fin": "53.086000",
+          "gia": "12.104000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 65
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 26,
+      "expenseId": "couple-27",
+      "description": "Internet",
+      "category": "utilities",
+      "total": "65.000000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "39.000000",
+        "gia": "26.000000"
+      },
+      "first": {
+        "shares": {
+          "fin": "39.000000",
+          "gia": "26.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 54
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 27,
+      "expenseId": "couple-28",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "94.650000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "56.790000",
+        "gia": "37.860000"
+      },
+      "first": {
+        "shares": {
+          "fin": "56.790000",
+          "gia": "37.860000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 49
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 28,
+      "expenseId": "couple-29",
+      "description": "Farmers market",
+      "category": "groceries",
+      "total": "111.600000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "66.960000",
+        "gia": "44.640000"
+      },
+      "first": {
+        "shares": {
+          "fin": "66.960000",
+          "gia": "44.640000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 29
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 3,
+      "n": 29,
+      "expenseId": "couple-30",
+      "description": "Dinner at State Bird",
+      "category": "dinner",
+      "total": "139.690000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "83.814000",
+        "gia": "55.876000"
+      },
+      "first": {
+        "shares": {
+          "fin": "83.814000",
+          "gia": "55.876000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 56
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 30,
+      "expenseId": "couple-31",
+      "description": "Trader Joe's",
+      "category": "groceries",
+      "total": "136.890000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "82.134000",
+        "gia": "54.756000"
+      },
+      "first": {
+        "shares": {
+          "fin": "82.134000",
+          "gia": "54.756000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 73
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 31,
+      "expenseId": "couple-32",
+      "description": "Farmers market",
+      "category": "groceries",
+      "total": "125.240000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "75.144000",
+        "gia": "50.096000"
+      },
+      "first": {
+        "shares": {
+          "fin": "75.144000",
+          "gia": "50.096000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 37
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 32,
+      "expenseId": "couple-33",
+      "description": "Dinner at Kin Khao",
+      "category": "dinner",
+      "total": "62.390000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "37.434000",
+        "gia": "24.956000"
+      },
+      "first": {
+        "shares": {
+          "fin": "37.434000",
+          "gia": "24.956000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 26
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 33,
+      "expenseId": "couple-34",
+      "description": "Phone plan",
+      "category": "utilities",
+      "total": "80.000000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "48.000000",
+        "gia": "32.000000"
+      },
+      "first": {
+        "shares": {
+          "fin": "48.000000",
+          "gia": "32.000000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 32
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 34,
+      "expenseId": "couple-35",
+      "description": "Target run",
+      "category": "other",
+      "total": "85.360000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.gia-personal"
+      ],
+      "truth": {
+        "fin": "16.944000",
+        "gia": "68.416000"
+      },
+      "first": {
+        "shares": {
+          "fin": "16.944000",
+          "gia": "68.416000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 29
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 35,
+      "expenseId": "couple-36",
+      "description": "Amazon order",
+      "category": "other",
+      "total": "96.850000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "74.650000",
+        "gia": "22.200000"
+      },
+      "first": {
+        "shares": {
+          "fin": "74.650000",
+          "gia": "22.200000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 23
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 36,
+      "expenseId": "couple-37",
+      "description": "Dinner at Kin Khao",
+      "category": "dinner",
+      "total": "160.730000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "96.438000",
+        "gia": "64.292000"
+      },
+      "first": {
+        "shares": {
+          "fin": "96.438000",
+          "gia": "64.292000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 23
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 37,
+      "expenseId": "couple-38",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "177.050000",
+      "rules": [
+        "couple.sixty-forty",
+        "couple.fin-personal"
+      ],
+      "truth": {
+        "fin": "123.890000",
+        "gia": "53.160000"
+      },
+      "first": {
+        "shares": {
+          "fin": "123.890000",
+          "gia": "53.160000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 38,
+      "expenseId": "couple-39",
+      "description": "Ramen takeout",
+      "category": "dinner",
+      "total": "51.710000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "31.026000",
+        "gia": "20.684000"
+      },
+      "first": {
+        "shares": {
+          "fin": "31.026000",
+          "gia": "20.684000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 16
+    },
+    {
+      "system": "quits",
+      "group": "couple",
+      "week": 4,
+      "n": 39,
+      "expenseId": "couple-40",
+      "description": "Safeway",
+      "category": "groceries",
+      "total": "39.190000",
+      "rules": [
+        "couple.sixty-forty"
+      ],
+      "truth": {
+        "fin": "23.514000",
+        "gia": "15.676000"
+      },
+      "first": {
+        "shares": {
+          "fin": "23.514000",
+          "gia": "15.676000"
+        },
+        "exact": true,
+        "misallocated": "0.000000"
+      },
+      "corrections": [],
+      "finalExact": true,
+      "unresolved": false,
+      "llm": {
+        "calls": 0,
+        "errors": 0,
+        "prompt": 0,
+        "completion": 0
+      },
+      "latencyMs": 18
+    }
+  ]
+}
