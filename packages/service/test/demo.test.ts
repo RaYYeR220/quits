@@ -40,10 +40,10 @@ describe('sandbox tab', () => {
     const id = await q.createSandbox('abc');
     expect(await q.createSandbox('abc')).toBe(id);
     const ex = await q.expenses(id);
-    const beers = ex.find((e) => e.expense.description === 'Friday beers and fries')!;
-    // Ana doesn't drink: 2.00 of beers split by Ben, Clara, Dan; fries 1.20 split by four
-    expect(beers.shares['demo-ana']).toBe(300_000n);
+    const beers = ex.find((e) => e.expense.description === 'Friday beers and crisps')!;
+    // Ana doesn't drink: 0.60 of beers split by Ben, Clara, Dan; crisps 0.40 split by four
+    expect(beers.shares['demo-ana']).toBe(100_000n);
     const debts = await q.refreshDebts(id);
-    expect(debts.every((d) => d.usdcMicro <= 1_000_000n)).toBe(true);
+    expect(debts.every((d) => d.usdcMicro <= 500_000n)).toBe(true);
   });
 });
