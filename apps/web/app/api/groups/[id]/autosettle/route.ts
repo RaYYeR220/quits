@@ -24,7 +24,7 @@ function terms(b: Record<string, unknown>): Terms {
 /**
  * Turn on auto-settle in a group. Demo members: one call, signed by their demo
  * wallet. Real members: `{step: "prepare"}` returns the transaction to sign,
- * `{step: "confirm", digest}` records it after it lands on-chain.
+ * `{step: "confirm", txBytes, signature}` executes it through Tatum and records it.
  */
 export const POST = handle(async (req: Request, { params }: P) => {
   const s = await requireSession();
@@ -38,8 +38,8 @@ export const POST = handle(async (req: Request, { params }: P) => {
   if (!u?.suiAddress) throw new HttpError(409, 'Connect a wallet first.');
   const t = terms(b);
   if (b.step === 'confirm') {
-    if (typeof b.digest !== 'string') throw new HttpError(400, 'digest is required.');
-    return confirmMandate(q, s.uid, u.suiAddress, id, b.digest, t);
+    if (typeof b.txBytes !== 'string' || typeof b.signature !== 'string') throw new HttpError(400, 'txBytes and signature are required.');
+    return { ...(await confirmMandate(q, s.uid, u.suiAddress, id, { txBytes: b.txBytes, signature: b.signature }, t)), terms: t };
   }
   return prepareMandate(q, s.uid, u.suiAddress, id, t);
 });

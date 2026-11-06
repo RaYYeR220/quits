@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useWallet } from './wallet.tsx';
 import { api, call, errorText, store } from './api.ts';
 import { short, toMicro, usdc, usdcFull } from './format.ts';
 import { useExplorer, useSession } from './session.tsx';
@@ -166,19 +167,6 @@ function PayTrace({ t, creditor, debtor, demo, debtId }: { t: Trace; creditor: s
       ) : t.phase === 'paying' ? (
         <Leg code="···" tone="wait" title={`${debtor}’s wallet signs a USDC transfer and sends it back with PAYMENT-SIGNATURE`} />
       ) : null}
-      {!demo && opt && !t.receipt ? (
-        <li className="grid grid-cols-[40px_1fr] gap-3">
-          <span />
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="button" className="btn btn-ghost btn-sm" disabled aria-describedby={`wallet-${debtId}`}>
-              Pay with wallet
-            </button>
-            <span id={`wallet-${debtId}`} className="meta">
-              Comes with wallet sign-in
-            </span>
-          </div>
-        </li>
-      ) : null}
       {t.error ? (
         <li role="alert" className="grid grid-cols-[40px_1fr] gap-3">
           <span className="mono text-[12px] text-warn">×</span>
@@ -201,6 +189,7 @@ function Recorded({ d }: { d: Debt }) {
 export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: bigint; onChanged: () => void }) {
   const { me, startDemo, switching, demoTerms } = useSession();
   const ex = useExplorer();
+  const wallet = useWallet();
   const demo = Boolean(me?.demo);
   const DEMO_CAP = toMicro(demoTerms.maxPerDebt);
   const [traces, setTraces] = useState<Record<string, Trace>>({});
@@ -225,8 +214,25 @@ export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: b
       return onChanged();
     }
     if (first.status !== 402) return setTrace(d.id, { phase: 'error', error: (first.data as { error?: string })?.error ?? `The endpoint answered ${first.status}.` });
-    setTrace(d.id, { ask: first.data, phase: demo ? 'paying' : 'done' });
-    if (!demo) return;
+    setTrace(d.id, { ask: first.data, phase: 'paying' });
+    if (!demo) {
+      // Real member: the server builds the exact transfer, the wallet signs it, the x402 endpoint settles it.
+      try {
+        const prep = await api<{ txBytes: string }>(`/api/pay/${d.id}/prepare`, { body: {} });
+        const signed = await wallet.signTxBytes(prep.txBytes);
+        const header = btoa(JSON.stringify({ x402Version: 2, payload: { signature: signed.signature, transaction: signed.transaction } }));
+        const res = await fetch(`/api/pay/${d.id}`, { credentials: 'include', cache: 'no-store', headers: { 'PAYMENT-SIGNATURE': header } });
+        const body = (await res.json()) as Receipt & { error?: string };
+        if (res.ok && body.settled) {
+          setTrace(d.id, { phase: 'done', receipt: body });
+          remember(d, body);
+          onChanged();
+        } else setTrace(d.id, { phase: 'error', error: body.error ?? `Payment answered ${res.status}.` });
+      } catch (e) {
+        setTrace(d.id, { phase: 'error', error: errorText(e) });
+      }
+      return;
+    }
     try {
       const r = await api<DemoPay>(`/api/demo/pay/${d.id}`, { method: 'POST' });
       if ('settled' in r.receipt && r.receipt.settled) {

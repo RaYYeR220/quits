@@ -6,6 +6,7 @@ import { short, toMicro } from './format.ts';
 import { useExplorer, useSession } from './session.tsx';
 import type { GroupData, Mandate, MandateTerms } from './types.ts';
 import { ErrorBlock, ExtLink, Money } from './ui.tsx';
+import { useWallet } from './wallet.tsx';
 
 function Terms({ t }: { t: MandateTerms }) {
   const secs = Math.round(t.objectionWindowMs / 1000);
@@ -36,6 +37,7 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
   const [mandate, setMandate] = useState<Mandate | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const wallet = useWallet();
 
   useEffect(() => {
     setMandate(store.get<Mandate>(key));
@@ -46,7 +48,14 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
     setBusy(true);
     setError(null);
     try {
-      const r = await api<Mandate>(`/api/groups/${data.group.id}/autosettle`, { body: {} });
+      let r: Mandate;
+      if (demo) r = await api<Mandate>(`/api/groups/${data.group.id}/autosettle`, { body: {} });
+      else {
+        // The server builds the allowance + mandate transaction, the wallet signs it, the server submits it through Tatum.
+        const prep = await api<{ txBytes: string }>(`/api/groups/${data.group.id}/autosettle`, { body: { step: 'prepare' } });
+        const signed = await wallet.signTxBytes(prep.txBytes);
+        r = await api<Mandate>(`/api/groups/${data.group.id}/autosettle`, { body: { step: 'confirm', txBytes: signed.transaction, signature: signed.signature } });
+      }
       setMandate(r);
       store.set(key, r);
       onChanged();
@@ -80,20 +89,10 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
           </p>
           {demo ? <Terms t={DEMO_TERMS} /> : null}
           <div className="mt-4 flex flex-wrap items-center gap-3" aria-live="polite">
-            {demo ? (
-              <button type="button" className="btn btn-mem" onClick={() => void turnOn()} disabled={busy}>
-                {busy ? 'Signing the mandate on Sui…' : 'Let my agent settle my debts here'}
-              </button>
-            ) : (
-              <>
-                <button type="button" className="btn btn-mem" disabled aria-describedby="auto-wallet">
-                  Let my agent settle my debts here
-                </button>
-                <span id="auto-wallet" className="meta">
-                  Your wallet signs the mandate. Comes with wallet sign-in.
-                </span>
-              </>
-            )}
+            <button type="button" className="btn btn-mem" onClick={() => void turnOn()} disabled={busy}>
+              {busy ? (demo ? 'Signing the mandate on Sui…' : 'Check your wallet…') : 'Let my agent settle my debts here'}
+            </button>
+            {!demo ? <span className="meta">Your wallet signs one allowance: up to 20 USDC per debt and per week, 12 h to object.</span> : null}
           </div>
           {error ? (
             <div className="mt-3">

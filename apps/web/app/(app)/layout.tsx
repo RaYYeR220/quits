@@ -1,6 +1,7 @@
 import { DEMO_TERMS } from '@/lib/mandates.ts';
 import { SessionProvider, type Net } from '@/components/session.tsx';
 import { AppShell } from '@/components/shell.tsx';
+import { WalletProvider } from '@/components/wallet.tsx';
 import type { MandateTerms } from '@/components/types.ts';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -15,8 +16,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     days: DEMO_TERMS.days,
   };
   return (
-    <SessionProvider net={net} demoTerms={demoTerms}>
-      <AppShell>{children}</AppShell>
-    </SessionProvider>
+    <WalletProvider>
+      <SessionProvider net={net} demoTerms={demoTerms}>
+        <AppShell>{children}</AppShell>
+      </SessionProvider>
+    </WalletProvider>
   );
 }

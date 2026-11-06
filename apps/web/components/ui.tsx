@@ -1,5 +1,7 @@
 'use client';
 
+import { WalletSignIn } from './wallet.tsx';
+
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { initial, usdc, usdcFull } from './format.ts';
@@ -128,12 +130,13 @@ export function SignInPrompt({ what }: { what: string }) {
   return (
     <div className="sheet mx-auto mt-16 max-w-xl p-8">
       <h1 className="h-sec">{what} needs a session</h1>
-      <p className="lede mt-2">
-        Wallet sign-in is on its way. Until then, try Quits as one of four flatmates with real debts settled on Sui.
-      </p>
+      <p className="lede mt-2">Sign in with a Sui wallet to keep your own groups, or try Quits as one of four flatmates with real debts settled on Sui.</p>
       <Link href="/demo" className="btn btn-mem btn-lg mt-6">
         Try the demo
       </Link>
+      <div className="mt-6 border-t border-[var(--line)] pt-5">
+        <WalletSignIn onSignedIn={() => window.location.reload()} />
+      </div>
     </div>
   );
 }

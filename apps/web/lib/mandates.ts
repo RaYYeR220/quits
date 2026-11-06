@@ -1,4 +1,4 @@
-import { toBase64 } from '@mysten/sui/utils';
+import { fromBase64, toBase64 } from '@mysten/sui/utils';
 import { createdObject, openMandateTx, signAndExecute, type ExecutedTx } from '@quits/chain';
 import { mandates } from '@quits/db';
 import type { Quits } from '@quits/service';
@@ -80,13 +80,18 @@ export async function prepareMandate(q: Quits, uid: string, address: string, gro
   return { txBytes: toBase64(bytes), creditors: c.ids };
 }
 
-/** Real member: record the mandate once their signed transaction is on-chain. */
-export async function confirmMandate(q: Quits, uid: string, address: string, groupId: string, digest: string, t: Terms) {
+/** Real member: execute the transaction their wallet signed (through Tatum) and record the mandate. */
+export async function confirmMandate(q: Quits, uid: string, address: string, groupId: string, signed: { txBytes: string; signature: string }, t: Terms) {
   const client = getSui().client;
-  const res = await client.core.getTransaction({ digest, include: { effects: true, objectTypes: true, transaction: true } });
+  const res = await client.core.executeTransaction({
+    transaction: fromBase64(signed.txBytes),
+    signatures: [signed.signature],
+    include: { effects: true, objectTypes: true, transaction: true },
+  });
   const txr = res.$kind === 'Transaction' ? res.Transaction : null;
   if (!txr || !txr.effects?.status.success) throw new HttpError(400, 'That transaction did not succeed.');
   if (txr.transaction?.sender !== address) throw new HttpError(403, 'That transaction was not sent by you.');
+  await client.core.waitForTransaction({ digest: txr.digest });
   const c = await creditorsOf(q, groupId, uid);
   return store(q, uid, groupId, c.ids, t, txr as unknown as ExecutedTx);
 }
