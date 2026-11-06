@@ -71,10 +71,22 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
     unary<I extends object, O extends object>(method: MethodInfo<I, O>, input: I, options: RpcOptions): UnaryCall<I, O> {
       const name = methodName(method);
       let t0 = 0;
-      const call = (limiter ? limiter.take() : Promise.resolve()).then(() => {
-        t0 = performance.now();
-        return inner.unary(method, input, options);
-      });
+      // A 429 means the gateway turned the request away before running it, so retrying is safe.
+      const attempt = async (): Promise<UnaryCall<I, O>> => {
+        for (let i = 0; ; i++) {
+          if (limiter) await limiter.take();
+          t0 = performance.now();
+          const c = inner.unary(method, input, options);
+          try {
+            await c.response;
+            return c;
+          } catch (err) {
+            if (i >= 5 || !isRateLimited(err)) throw err;
+            await new Promise((r) => setTimeout(r, 700 * (i + 1)));
+          }
+        }
+      };
+      const call = attempt();
       const response = call.then((c) => c.response);
       response.then(
         () => recordCall(log, { surface: 'grpc', method: name, ms: elapsedSince(t0), ok: true }),
@@ -126,4 +138,9 @@ function errorCode(err: unknown): string | undefined {
 function quiet<T>(p: Promise<T>): Promise<T> {
   p.catch(() => {});
   return p;
+}
+
+function isRateLimited(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /\b429\b|rate limit|too many requests/i.test(msg);
 }
