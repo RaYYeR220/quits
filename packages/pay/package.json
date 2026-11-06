@@ -8,8 +8,9 @@
   },
   "dependencies": {
     "@mysten/sui": "^2.39.0",
-    "@suimpp/mpp": "0.9.0",
+    "@quits/chain": "workspace:*",
     "@quits/core": "workspace:*",
-    "@quits/chain": "workspace:*"
+    "@suimpp/mpp": "0.9.0",
+    "mppx": "0.4.12"
   }
 }
