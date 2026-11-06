@@ -84,6 +84,15 @@ describe('split', () => {
     expect(split(expense({ usdc: '60.00', payerId: 'fin', ...base }), rules).shares).toEqual({ fin: u('40'), gia: u('20') });
   });
 
+  it('lets a more specific routing rule beat an older, broader one', () => {
+    const rules = [
+      rule({ kind: 'covers', member: 'gia', when: { tags: ['personal'] } }),
+      rule({ kind: 'only', members: ['fin'], when: { tags: ['personal'], payer: 'fin' } }),
+    ];
+    const e = expense({ usdc: '80.00', payerId: 'fin', participants: ['fin', 'gia'], items: [{ label: 'headphones', usdcMicro: u('50'), tags: ['personal'] }] });
+    expect(split(e, rules).shares).toEqual({ fin: u('65'), gia: u('15') });
+  });
+
   it('lets covers win over exclude', () => {
     const e = expense({ usdc: '20.00', category: 'taxi' });
     const r = split(e, [

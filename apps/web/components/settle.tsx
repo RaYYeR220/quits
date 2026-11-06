@@ -116,6 +116,7 @@ interface Trace {
   phase: 'asking' | 'paying' | 'done' | 'error';
   ask?: X402Requirements;
   receipt?: Receipt;
+  topUp?: { from: string; amount: string; digest: string } | null;
   error?: string;
 }
 
@@ -144,6 +145,14 @@ function PayTrace({ t, creditor, debtor, demo, debtId }: { t: Trace; creditor: s
         </Leg>
       ) : t.phase === 'asking' ? (
         <Leg code="···" tone="wait" title="Asking the debt’s x402 endpoint for its price" />
+      ) : null}
+      {t.topUp ? (
+        <Leg code="pool" tone="wait" title="Demo wallet topped up from the demo pool first">
+          {usdcFull(t.topUp.amount)} USDC from {short(t.topUp.from)} · gasless ·{' '}
+          <ExtLink href={ex.tx(t.topUp.digest)} label={`Transaction ${t.topUp.digest} on Suiscan`}>
+            {short(t.topUp.digest, 8, 6)}
+          </ExtLink>
+        </Leg>
       ) : null}
       {t.receipt ? (
         <Leg code="200" tone="ink" title={`Paid. ${debtor}’s signed USDC transfer settled on Sui`}>
@@ -221,7 +230,7 @@ export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: b
     try {
       const r = await api<DemoPay>(`/api/demo/pay/${d.id}`, { method: 'POST' });
       if ('settled' in r.receipt && r.receipt.settled) {
-        setTrace(d.id, { phase: 'done', ask: r.challenge ?? first.data, receipt: r.receipt });
+        setTrace(d.id, { phase: 'done', ask: r.challenge ?? first.data, receipt: r.receipt, topUp: r.topUp ?? null });
         remember(d, r.receipt);
         onChanged();
       } else {

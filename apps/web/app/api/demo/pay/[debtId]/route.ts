@@ -1,4 +1,6 @@
+import { gaslessUsdcTx, signAndExecute, withValidDuring } from '@quits/chain';
 import { buildWalletPayment, paymentRequired, PAYMENT_SIGNATURE_HEADER } from '@quits/pay';
+import { DEMO_MEMBERS } from '@quits/service';
 import { chainConfig, demoSigner, getQuits, getSui, network } from '@/lib/deps.ts';
 import { payDebt } from '@/lib/paydebt.ts';
 import { handle, HttpError, requireSession } from '@/lib/route.ts';
@@ -26,6 +28,29 @@ export const POST = handle(async (req: Request, { params }: P) => {
   const signer = demoSigner(s.uid);
   if (!signer) throw new HttpError(503, 'Demo wallets are not configured.');
 
+  // Demo money pools with whoever is owed; if this wallet is short, top it up from the
+  // richest demo wallet first (a separate gasless transfer, reported as such).
+  const client = getSui().client;
+  const usdc = chainConfig().usdcType;
+  const balanceOf = async (addr: string) => BigInt((await client.core.getBalance({ owner: addr, coinType: usdc })).balance.addressBalance ?? '0');
+  let topUp: { from: string; amount: string; digest: string } | null = null;
+  const have = await balanceOf(signer.toSuiAddress());
+  if (have < d.usdcMicro && network !== 'localnet') {
+    const others = DEMO_MEMBERS.filter((m) => m.id !== s.uid)
+      .map((m) => demoSigner(m.id))
+      .filter((k): k is NonNullable<typeof k> => k !== null);
+    const funds = await Promise.all(others.map(async (k) => ({ k, usdc: await balanceOf(k.toSuiAddress()) })));
+    funds.sort((a, b) => (a.usdc > b.usdc ? -1 : 1));
+    const need = d.usdcMicro - have + 50_000n;
+    const donor = funds[0];
+    if (!donor || donor.usdc < need) throw new HttpError(409, 'The demo wallets are low right now. Try a smaller bill.');
+    const tx = gaslessUsdcTx({ to: signer.toSuiAddress(), amount: need, usdcType: usdc });
+    tx.setSender(donor.k.toSuiAddress());
+    await withValidDuring(tx, client);
+    const r = await signAndExecute(client, donor.k, tx);
+    topUp = { from: donor.k.toSuiAddress(), amount: need.toString(), digest: r.digest };
+  }
+
   const url = new URL(`/api/pay/${debtId}`, req.url).toString();
   const first = await payDebt(q, new Request(url), debtId);
   if (first.status !== 402) return first;
@@ -37,8 +62,8 @@ export const POST = handle(async (req: Request, { params }: P) => {
     { id: d.id, debtor: signer.toSuiAddress(), creditor: creditor!, usdcMicro: d.usdcMicro },
     { resource: url, usdcType: chainConfig().usdcType, network: network === 'localnet' ? 'localnet' : 'mainnet' },
   ).body;
-  const header = await buildWalletPayment(signer, reqs, { client: getSui().client });
+  const header = await buildWalletPayment(signer, reqs, { client });
   const second = await payDebt(q, new Request(url, { headers: { [PAYMENT_SIGNATURE_HEADER]: header } }), debtId);
   const receipt = await second.json();
-  return { challenge, receipt, status: second.status };
+  return { challenge, receipt, status: second.status, topUp };
 });

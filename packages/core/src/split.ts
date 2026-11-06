@@ -29,6 +29,19 @@ function matches(r: Rule, e: Expense, unit: Unit): boolean {
   return true;
 }
 
+function specificity(r: Rule): number {
+  return (r.when.category ? 1 : 0) + (r.when.tags ? 1 : 0) + (r.when.payer ? 1 : 0);
+}
+
+function mostSpecific(rs: Rule[]): Rule | undefined {
+  return rs.reduce<Rule | undefined>((best, r) => {
+    if (!best) return r;
+    const a = specificity(r);
+    const b = specificity(best);
+    return a > b || (a === b && r.learnedAt >= best.learnedAt) ? r : best;
+  }, undefined);
+}
+
 function latest(rs: Rule[]): Rule | undefined {
   return rs.reduce<Rule | undefined>((acc, r) => (!acc || r.learnedAt >= acc.learnedAt ? r : acc), undefined);
 }
@@ -37,9 +50,10 @@ function latest(rs: Rule[]): Rule | undefined {
  * Splits one expense among its participants, applying learned rules.
  *
  * The expense is cut into units: one per tagged line item plus the untagged
- * remainder. For each unit the matching rules apply in this order:
- * `covers` (one member takes it all) > `payerCovers` (the payer takes it all) > `only` >
- * `exclude` / `payerExcluded` > `weights` > equal.
+ * remainder. For each unit, the routing rules (`covers`: one member takes it all,
+ * `payerCovers`: the payer does, `only`: a named subset shares it) compete and the
+ * most specific matching one wins (ties: the newest). Then `exclude` / `payerExcluded`
+ * narrow the set, `weights` divide it, otherwise it is split equally.
  * Rules naming people who aren't participants are ignored. If the rules leave
  * nobody to pay a unit, that unit is split equally and `conflict` is set.
  */
@@ -67,23 +81,26 @@ export function split(e: Expense, rules: readonly Rule[]): SplitResult {
     const used: Rule[] = [];
     let weights: Record<MemberId, number>;
 
-    const cover = latest(hits.filter((r) => r.kind === 'covers' && present.has(r.member)));
-    const payerCover = present.has(e.payerId) ? latest(hits.filter((r) => r.kind === 'payerCovers')) : undefined;
-    if (cover && cover.kind === 'covers') {
-      weights = { [cover.member]: 1 };
-      used.push(cover);
-    } else if (payerCover) {
+    // Rules that decide who carries the unit (one member, the payer, or a named subset):
+    // the most specific one wins, and among equally specific ones the newest.
+    const routing = hits.filter(
+      (r) =>
+        (r.kind === 'covers' && present.has(r.member)) ||
+        (r.kind === 'payerCovers' && present.has(e.payerId)) ||
+        (r.kind === 'only' && r.members.some((m) => present.has(m))),
+    );
+    const route = mostSpecific(routing);
+    if (route?.kind === 'covers') {
+      weights = { [route.member]: 1 };
+      used.push(route);
+    } else if (route?.kind === 'payerCovers') {
       weights = { [e.payerId]: 1 };
-      used.push(payerCover);
+      used.push(route);
     } else {
       let set = new Set(people);
-      const only = latest(hits.filter((r) => r.kind === 'only'));
-      if (only && only.kind === 'only') {
-        const narrowed = only.members.filter((m) => present.has(m));
-        if (narrowed.length > 0) {
-          set = new Set(narrowed);
-          used.push(only);
-        }
+      if (route?.kind === 'only') {
+        set = new Set(route.members.filter((m) => present.has(m)));
+        used.push(route);
       }
       for (const r of hits) {
         if (r.kind === 'exclude' && set.has(r.member)) {

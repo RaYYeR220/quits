@@ -151,6 +151,7 @@ export interface DemoPay {
   challenge: X402Requirements;
   receipt: Receipt | { error: string };
   status: number;
+  topUp?: { from: string; amount: string; digest: string } | null;
 }
 
 export interface MandateTerms {
