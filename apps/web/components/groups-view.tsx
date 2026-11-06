@@ -132,6 +132,42 @@ function CreateJoin({ onDone }: { onDone: (id: string) => void }) {
   );
 }
 
+/** Wallet sign-in starts you as a shortened address; bills and corrections need a name. */
+function NameCard({ onSaved }: { onSaved: () => void }) {
+  const [name, setName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await api('/api/me', { body: { name } });
+      onSaved();
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <form onSubmit={save} className="sheet mt-8 p-5 sm:p-6">
+      <h2 className="h-sec">What should your groups call you?</h2>
+      <p className="mt-2 text-[14px] text-ink-2">People write &ldquo;Ana doesn&rsquo;t drink&rdquo;, not an address. Quits matches names in bills and corrections to members.</p>
+      <div className="mt-4 flex gap-2">
+        <label htmlFor="me-name" className="sr-only">
+          Your name
+        </label>
+        <input id="me-name" className="field" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ana" maxLength={40} required />
+        <button className="btn btn-ink flex-none" disabled={busy || !name.trim()}>
+          {busy ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+      {error ? <p className="notice notice-warn mt-3" role="alert">{error}</p> : null}
+    </form>
+  );
+}
+
 export function GroupsView() {
   const { me, state, tabKey, refresh } = useSession();
   const router = useRouter();
@@ -151,6 +187,8 @@ export function GroupsView() {
           ? `You’re ${me.user.name} in the demo. Your Coffee tab is yours to change; Flat 5B and the Lisbon trip are shared with every visitor.`
           : 'Every group keeps its own memory of how you split things.'}
       </p>
+
+      {!me.demo && /^0x[0-9a-f]{4}…[0-9a-f]{4}$/i.test(me.user.name) ? <NameCard onSaved={() => void refresh()} /> : null}
 
       <section className="sheet mt-8 p-2" aria-label="Groups">
         {groups.length === 0 ? (

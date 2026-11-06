@@ -90,6 +90,10 @@ for (const m of [avery, blake]) {
   const r = await m.signIn();
   step(`${m.name} signs in with a wallet signature`, r.status === 200 && Boolean(r.data.uid), r.data);
 }
+const named = await blake.call('POST', '/api/me', { name: '  Blake  ' });
+step('a wallet member picks the name their groups see', named.status === 200 && named.data.name === 'Blake', named.data);
+const asAddress = await blake.call('POST', '/api/me', { name: '0x7723…5a1e' });
+step('an address is not accepted as a name', asAddress.status === 400, asAddress.data);
 const mallory = new Member('Mallory');
 const fresh = await mallory.call('POST', '/api/auth/challenge', {});
 const wrongKey = await blake.key.signPersonalMessage(new TextEncoder().encode(fresh.data.message));
