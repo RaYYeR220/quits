@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import { Bot, InlineKeyboard, type Context } from 'grammy';
 import { formatUsdc } from '@quits/core';
 import { apiTokens, telegramLinks, telegramUsers } from '@quits/db';
-import { DEMO_FLAT, DEMO_MEMBERS, type Proposal, type Quits } from '@quits/service';
+import { DEMO_MEMBERS, type Proposal, type Quits } from '@quits/service';
 
 const hash = (t: string) => createHash('sha256').update(t).digest('hex');
 
@@ -71,10 +71,10 @@ export function createTelegramBot(token: string, q: Quits, webUrl: string): Bot 
       .insert(telegramUsers)
       .values({ telegramUserId: String(ctx.from!.id), userId: m.id })
       .onConflictDoUpdate({ target: telegramUsers.telegramUserId, set: { userId: m.id } });
-    if (ctx.chat.type === 'private') {
-      await q.ctx.db.insert(telegramLinks).values({ chatId: String(ctx.chat.id), groupId: DEMO_FLAT }).onConflictDoUpdate({ target: telegramLinks.chatId, set: { groupId: DEMO_FLAT } });
-    }
-    await ctx.reply(`You're ${m.name} in Flat 5B now. Send an expense like:\n"412 zł dinner, I paid, 140 of it was wine"`);
+    // each chat gets its own Coffee tab with the four flatmates, so visitors never write into the shared demo groups
+    const tab = await q.createSandbox(`tg${String(ctx.chat.id).replace(/[^0-9]/g, '')}`);
+    await q.ctx.db.insert(telegramLinks).values({ chatId: String(ctx.chat.id), groupId: tab }).onConflictDoUpdate({ target: telegramLinks.chatId, set: { groupId: tab } });
+    await ctx.reply(`You're ${m.name} in your own Coffee tab with Ana, Ben, Clara and Dan. Ana's and Clara's habits come from their own memory. Send an expense like:\n"Friday drinks 2 USD, I paid, 1.20 of it was beer"`);
   });
 
   bot.command('link', async (ctx) => {

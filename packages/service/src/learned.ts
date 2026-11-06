@@ -55,6 +55,16 @@ function parseBody(body: unknown): Rule | null {
  * marked `saving`. If Walrus can't be read, the local index is used and the
  * result is marked `degraded: 'cached'`.
  */
+const RECALL_DEADLINE_MS = Number(process.env.QUITS_RECALL_DEADLINE_MS ?? 8_000);
+
+function withDeadline<T>(p: Promise<T>, ms: number): Promise<T> {
+  let t: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<never>((_, reject) => {
+    t = setTimeout(() => reject(new Error(`memory recall took longer than ${ms} ms`)), ms);
+  });
+  return Promise.race([p, late]).finally(() => clearTimeout(t));
+}
+
 export async function loadRules(
   ctx: Ctx,
   groupId: string,
@@ -76,8 +86,10 @@ export async function loadRules(
       { ns: nsGroupRules(groupId) },
       ...participants.map((p) => ({ ns: nsMember(p), owner: p, accountId: accounts.get(p) ?? null })),
     ];
-    const results = await Promise.all(
-      reads.map(async (r) => ({ r, hits: await ctx.memory.recall(r.ns, query, { topK: 100, ...(r.accountId ? { accountId: r.accountId } : {}) }) })),
+    // A slow relayer shouldn't hold a split hostage: past the deadline the rules come from the index, marked cached.
+    const results = await withDeadline(
+      Promise.all(reads.map(async (r) => ({ r, hits: await ctx.memory.recall(r.ns, query, { topK: 100, ...(r.accountId ? { accountId: r.accountId } : {}) }) }))),
+      RECALL_DEADLINE_MS,
     );
     for (const { r, hits } of results) {
       for (const h of hits) {

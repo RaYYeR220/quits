@@ -144,9 +144,11 @@ function DayOne({ data, ownerOf }: { data: GroupData; ownerOf: (ruleId: string) 
                   <SplitRows split={then} members={data.members} meId={data.me} />
                 </div>
                 <div className="mt-3">
-                  <WhyList split={then} ownerOf={ownerOf} empty="Nothing remembered yet, so it splits evenly." />
+                  <WhyList split={then} ownerOf={ownerOf} empty={`None of today’s rules existed on ${day(data.group.createdAt)}, so it splits evenly.`} />
                 </div>
-                <p className="mono mt-3 text-[11.5px] text-ink-3">{then.memoriesRead} memories read</p>
+                <p className="mono mt-3 text-[11.5px] text-ink-3">
+                  {then.memoriesRead} memories read · {then.why.length} known by {day(data.group.createdAt)} apply here
+                </p>
               </div>
               <div className="panel border-[rgba(185,168,255,.28)] p-4">
                 <div className="flex items-baseline justify-between">
@@ -159,7 +161,9 @@ function DayOne({ data, ownerOf }: { data: GroupData; ownerOf: (ruleId: string) 
                 <div className="mt-3">
                   <WhyList split={now} ownerOf={ownerOf} />
                 </div>
-                <p className="mono mt-3 text-[11.5px] text-ink-3">{now.memoriesRead} memories read</p>
+                <p className="mono mt-3 text-[11.5px] text-ink-3">
+                  {now.memoriesRead} memories read · {now.why.length} apply here
+                </p>
               </div>
             </div>
             <p className="mt-4 text-[13.5px] text-ink-2">

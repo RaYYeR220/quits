@@ -267,6 +267,36 @@ export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: b
 
   const open = [...data.debts].sort((a, b) => Number((a.debtorId === data.me ? 0 : 1) - (b.debtorId === data.me ? 0 : 1)));
 
+  // a debt paid in this session keeps its place at the top with its receipt; older ones sit below the open debts
+  const settledRow = (s: (typeof settled)[number]) => {
+          const t = traces[s.id];
+          return (
+            <li key={s.id} className="py-3.5">
+              <div className="flex items-center gap-3 opacity-80">
+                <span className="flex flex-none items-center -space-x-1.5">
+                  <Avatar name={name(s.debtorId)} size={26} className="relative z-[1] bg-card" />
+                  <Avatar name={name(s.creditorId)} size={26} className="bg-card" />
+                </span>
+                <span className="min-w-0 flex-1 text-[14px] leading-tight text-ink-2">
+                  {s.debtorId === data.me ? 'You' : name(s.debtorId)} paid {s.creditorId === data.me ? 'you' : name(s.creditorId)}
+                  <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="chip">{(s.settled.status && SETTLED_LABEL[s.settled.status]) ?? 'settled'}</span>
+                    <ExtLink href={s.settled.explorer || ex.tx(s.settled.digest)} className="text-[11.5px]" label={`Transaction ${s.settled.digest} on Suiscan`}>
+                      {short(s.settled.digest, 8, 6)}
+                    </ExtLink>
+                  </span>
+                </span>
+                <Money micro={s.usdcMicro} className="text-[15px] text-ink-2" />
+              </div>
+              {t ? (
+                <div className="sm:pl-[50px]">
+                  <PayTrace t={t} creditor={name(s.creditorId)} debtor={name(s.debtorId)} demo={demo} debtId={s.id} />
+                </div>
+              ) : null}
+            </li>
+          );
+  };
+
   return (
     <section aria-labelledby="settle-h" className="sheet p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3">
@@ -279,6 +309,7 @@ export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: b
       {open.length === 0 && settled.length === 0 ? <p className="mt-4 text-[14px] text-ink-2">Everyone’s even. New bills will show up here as debts.</p> : null}
 
       <ul className="mt-3 divide-y divide-line">
+        {settled.filter((s) => traces[s.id]).map(settledRow)}
         {open.map((d) => {
           const isMine = d.debtorId === data.me;
           const amt = toMicro(d.usdcMicro);
@@ -344,34 +375,7 @@ export function SettleUp({ data, limit, onChanged }: { data: GroupData; limit: b
             </li>
           );
         })}
-        {settled.map((s) => {
-          const t = traces[s.id];
-          return (
-            <li key={s.id} className="py-3.5">
-              <div className="flex items-center gap-3 opacity-80">
-                <span className="flex flex-none items-center -space-x-1.5">
-                  <Avatar name={name(s.debtorId)} size={26} className="relative z-[1] bg-card" />
-                  <Avatar name={name(s.creditorId)} size={26} className="bg-card" />
-                </span>
-                <span className="min-w-0 flex-1 text-[14px] leading-tight text-ink-2">
-                  {s.debtorId === data.me ? 'You' : name(s.debtorId)} paid {s.creditorId === data.me ? 'you' : name(s.creditorId)}
-                  <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <span className="chip">{(s.settled.status && SETTLED_LABEL[s.settled.status]) ?? 'settled'}</span>
-                    <ExtLink href={s.settled.explorer || ex.tx(s.settled.digest)} className="text-[11.5px]" label={`Transaction ${s.settled.digest} on Suiscan`}>
-                      {short(s.settled.digest, 8, 6)}
-                    </ExtLink>
-                  </span>
-                </span>
-                <Money micro={s.usdcMicro} className="text-[15px] text-ink-2" />
-              </div>
-              {t ? (
-                <div className="sm:pl-[50px]">
-                  <PayTrace t={t} creditor={name(s.creditorId)} debtor={name(s.debtorId)} demo={demo} debtId={s.id} />
-                </div>
-              ) : null}
-            </li>
-          );
-        })}
+        {settled.filter((s) => !traces[s.id]).map(settledRow)}
       </ul>
       <div aria-live="polite">{note ? <p className="notice mt-3">{note}</p> : null}</div>
     </section>
