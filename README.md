@@ -18,6 +18,13 @@ Quits remembers. You log a bill in plain words; Quits proposes who owes what and
 2. **Correct it once.** "Ana doesn't drink." The correction becomes a typed rule and a Walrus Memory memory. A one-off fact ("Dan wasn't there tonight") fixes that bill and teaches nothing.
 3. **Settle in one tap, or let your agent do it.** Every debt is an [x402](https://x402.org) resource (and an MPP challenge) settled in USDC on Sui mainnet. Turn on auto-settle and your agent pays from a Sui Allowance: only the exact debt, only to people in the group, never more than the weekly limit you signed, with a window to object first. The Move contract enforces each of those, not our server.
 
+<p>
+  <img src="docs/img/proposal.jpg" width="49%" alt="A bill split in the app: the beer is taken off Ana's share, and the card names the memory that did it, learned Oct 14, stored on Walrus, with its blob id">
+  <img src="docs/img/settle.jpg" width="49%" alt="Settle up: the debt answers 402 Payment required with the exact USDC amount on sui:mainnet, then 200 Paid with the transaction digest">
+</p>
+
+Left: the split names the memory that changed it, with its Walrus blob. Right: a debt is an x402 resource; paying it is a gasless USDC transfer on Sui mainnet, with the digest.
+
 ## Does it actually learn?
 
 <!-- results:start -->
@@ -97,11 +104,15 @@ flowchart LR
 
 Everything in the diagram runs in production today.
 
+<img src="docs/img/rules.jpg" alt="What Quits has learned in Flat 5B: five rules, each from one correction, each stored on Walrus with its blob id; two live in members' own memory and follow them to every group">
+
 **Walrus Memory is where the product's knowledge lives.** At every decision Quits reads the group's rules and each participant's portable memory back from Walrus (`recall`), applies the rules it finds, and cites the memory blob behind each one. The local database only indexes them: wipe it and "Rebuild from Walrus" restores the same behaviour (and refuses to touch the index if Walrus returns fewer rules than it holds). Each memory is a Walrus `Blob` object owned by the memory account's wallet and tagged with the delegate key that wrote it; `/proof` and `pnpm verify:onchain` list them from chain. A member can point their portable memory at their own Walrus Memory account, so it lands in their wallet and they can revoke Quits. Namespaces: `quits:g:<group>:rules`, `quits:g:<group>:log`, `quits:m:<member>`.
 
 **Tatum is the chain gateway.** All Sui reads and writes go through Tatum: gRPC (native transport) for balances, objects, simulate-and-execute of every x402 payment, the settlement agent's transactions and a filtered `SubscribeCheckpoints` stream that matches direct USDC transfers to open debts; GraphQL for memory receipts; the exchange-rate API for every non-USD bill. `/proof` shows the live per-method call log.
 
-**Sui does the money.** The Move package `quits::settle` binds a member's `Allowance` to Quits with an app witness and only mints a `SpendPermit` for a recorded debt, the exact amount, to a creditor the member listed, once, after the objection window. Wallet payments are gasless USDC transfers (`balance::send_funds`, `ValidDuring` expiry), so members never need SUI. 23 Move tests cover each refusal.
+<img src="docs/img/proof.jpg" alt="The public proof page: network sui:mainnet, memories stored on Walrus, Tatum calls per method with latency, and every settlement on Sui with its digest">
+
+**Sui does the money.** The Move package `quits::settle` binds a member's `Allowance` to Quits with an app witness and only mints a `SpendPermit` for a recorded debt, the exact amount, to a creditor the member listed, once, after the objection window. Wallet payments are gasless USDC transfers (`balance::send_funds`, `ValidDuring` expiry), so paying a debt needs no SUI; opening a mandate is an ordinary transaction. 23 Move tests cover each refusal.
 
 | Package | What it does |
 | --- | --- |
