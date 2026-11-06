@@ -49,7 +49,11 @@ async function every(name: string, ms: number, fn: () => Promise<unknown>) {
     } catch (e) {
       log(`${name} failed`, { error: e instanceof Error ? e.message : String(e) });
     }
-    await new Promise((r) => setTimeout(r, ms));
+    // wake early on shutdown so systemd doesn't have to kill us mid-sleep
+    await new Promise<void>((r) => {
+      const t = setTimeout(r, ms);
+      stop.signal.addEventListener('abort', () => (clearTimeout(t), r()), { once: true });
+    });
   }
 }
 
@@ -107,3 +111,6 @@ if (tg) {
 
 log('worker up', { network, memory: memory.kind });
 await Promise.allSettled(jobs);
+log('worker stopped');
+// open sockets (database pool, gRPC channel) would otherwise keep the process alive
+process.exit(0);
