@@ -1,0 +1,11 @@
+{
+  "memory": {
+    "owner": "0xbc02b930206de470ed100fcd4d6ae25535647baef950a8dee68bafc73103db8d",
+    "agentId": "951edfde65ae7bd307148bd7e7ed5beed9bfc960958ae7fb7f0e153982cf2505"
+  },
+  "walletPayments": [],
+  "agentPayments": [],
+  "externalPayments": [],
+  "debts": [],
+  "mandates": []
+}
