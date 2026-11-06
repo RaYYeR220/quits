@@ -1,0 +1,2 @@
+# offline (EVAL_LLM=fake) runs are harness checks, not results
+results/fake/

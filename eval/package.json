@@ -11,6 +11,7 @@
     "@quits/db": "workspace:^",
     "@quits/llm": "workspace:*",
     "@quits/memory": "workspace:*",
-    "@quits/service": "workspace:^"
+    "@quits/service": "workspace:^",
+    "zod": "^4.1.0"
   }
 }
