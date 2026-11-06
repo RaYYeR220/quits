@@ -38,10 +38,12 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const wallet = useWallet();
+  const [justOn, setJustOn] = useState(false);
 
   useEffect(() => {
     setMandate(store.get<Mandate>(key));
     setError(null);
+    setJustOn(false);
   }, [key]);
 
   async function turnOn() {
@@ -58,6 +60,7 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
       }
       setMandate(r);
       store.set(key, r);
+      setJustOn(true);
       onChanged();
     } catch (e) {
       setError(errorText(e));
@@ -66,7 +69,8 @@ export function AutoSettle({ data, limit, onChanged }: { data: GroupData; limit:
     }
   }
 
-  const on = Boolean(mine?.autoSettle);
+  // show it as on straight away; the group refetch confirms it a moment later
+  const on = Boolean(mine?.autoSettle) || justOn;
   const terms = mandate?.terms ?? DEMO_TERMS;
   // The agent never pays more per debt than the mandate allows, whatever it has learned.
   const cap = demo || mandate ? toMicro(terms.maxPerDebt) : null;

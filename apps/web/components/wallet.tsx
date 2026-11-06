@@ -13,6 +13,7 @@ function makeKit() {
     networks: ['mainnet'],
     defaultNetwork: 'mainnet',
     autoConnect: true,
+    slushWalletConfig: { appName: 'Quits' },
     createClient: (network) => new SuiGrpcClient({ network, baseUrl: 'https://fullnode.mainnet.sui.io:443' }),
   });
 }
