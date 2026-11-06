@@ -1,0 +1,13 @@
+{
+  "network": "mainnet",
+  "package": "0x39cfcfe852fd8e80a88c3b47ce2269777dc9c69bd60d5364da0952ac7ae39cd2",
+  "config": "0x60833b70cd3550288e58207102187efdfcb283dff28ac6e6fd6fc32f4b9abcde",
+  "adminCap": "0x2e4b9c716017cb1bc89cbd16e21b22601a9940facf0c619e14158b2e05b804c5",
+  "upgradeCap": "0x65b0d422a8095b3d5e398ef268d1fcc456ccf0662fd43a0cf685a02b7271a28b",
+  "publishTx": "98xJbLpAZxxrSrC8YyemNcKHk5jpazPfJ4trwhxu75k3",
+  "rolesTx": "CUEsggdMNHbHVpoX9o32Zc2tfYaWPFQjsdbFeksCSP4v",
+  "registrar": "0x83a95b1911721e9158fc3995cb84abee2b26e67f9fc5904dd0e88a1dbe914ab2",
+  "agent": "0x575b2fe654ca54044b866abb17a78d7f3102b13a6d55f3eefc31c42eb01b5d20",
+  "usdc": "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+  "publishedAt": "2026-11-06T08:08:10.016Z"
+}
