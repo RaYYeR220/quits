@@ -25,7 +25,7 @@ export function migrationsFolder(): string {
 
 /** Postgres over the network. */
 export async function connectDb(url: string, opts: { migrate?: boolean; max?: number } = {}): Promise<Db> {
-  const client = postgres(url, { max: opts.max ?? 5, prepare: false, ...(url.includes('sslmode=require') ? { ssl: 'require' as const } : {}) });
+  const client = postgres(url, { max: opts.max ?? 5, prepare: false, onnotice: () => {}, ...(url.includes('sslmode=require') ? { ssl: 'require' as const } : {}) });
   const db = drizzlePg(client, { schema });
   if (opts.migrate) await migratePg(db, { migrationsFolder: migrationsFolder() });
   return db;
