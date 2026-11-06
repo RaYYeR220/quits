@@ -20,7 +20,7 @@ describe('allocate', () => {
   it('gives zero to a zero-weight member', () => {
     const r = allocate(9_000_000n, { a: 1, b: 0, c: 2 });
     expect(r.b).toBe(0n);
-    expect(r.a + r.c).toBe(9_000_000n);
+    expect((r.a ?? 0n) + (r.c ?? 0n)).toBe(9_000_000n);
   });
 
   it('keeps the sum exact for awkward totals', () => {
