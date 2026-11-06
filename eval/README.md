@@ -62,11 +62,22 @@ npx vitest run eval
 
 - The hidden habits are written in the Quits rule language, so every habit is one Quits can express. Real groups have habits it can't ("whoever forgot their wallet last time pays"); this benchmark says nothing about those.
 - The member is simulated and polite: one clear, on-topic correction at a time, picked by a fixed procedure. Real people are vaguer and sometimes wrong.
-- The member only talks about the group's real habits. They never open the rules page to revoke a rule Quits got wrong, so a bad rule stays until a later correction happens to replace it. In the couple group that is the main source of misses: "her personal things are on her" became "Gia covers every personal item" with no payer condition, and because a covering rule outranks the narrower rules learned after it ("only Fin pays for what Fin buys for himself"), Fin's own purchases kept landing on Gia. That is a real weakness of the product, and the numbers include it.
+- The member only talks about the group's real habits. They never open the rules page to revoke a rule Quits got wrong, so a bad rule stays until a later correction happens to replace it. In the first run that was the main source of misses in the couple group: "her personal things are on her" became "Gia covers every personal item" with no payer condition, and it outranked the narrower rules learned after it. Routing rules are now ranked by how specific they are, then by age (see the changelog).
 - The full-history baseline is strong. Within a four-week window the whole history fits in the prompt and the model picks up the habits after seeing each one corrected once. What it pays is in the token and latency columns, and its prompt grows with every expense the group adds; Quits' cost per decision doesn't.
 - With the default model most completion tokens are the model's own reasoning, for every system that calls it. The baselines need it to do arithmetic on every expense; Quits only calls the model to turn a correction into a rule and does the arithmetic in code.
 - Quits gets the expense as a structured draft, exactly like the baselines. Turning a sentence into an expense (`parseExpense`) is not measured here.
-- Each group runs on its own fresh database and memory, so Quits' portable member rules (Ana's "doesn't drink" following her into the trip) are not counted. Measuring them would favour Quits.
+- In the main table each group runs on its own fresh database and memory, so a member's portable rules never help there. The second-group scenario measures them on their own.
 - Memory is the in-process stand-in for Walrus Memory with the same API. It returns every rule in a namespace, which is what the real relayer does for namespaces this small; write latency and rate limits of the real network are not part of these numbers.
 - The service has no "set shares by hand" call yet, so when the member gives up on a Quits proposal, the draft is posted as proposed. Posted shares never become rules, so this neither helps nor hurts later proposals.
 - LLM answers vary from run to run even at temperature 0. The expenses and the member's choices are deterministic given the seed; the models are not.
+
+## Changelog
+
+Every run is in `eval/results/`, and the README lists them all with their numbers. What changed between them:
+
+1. **First run** (seed 20261106). The whole-history prompt beat Quits on first-try accuracy. The cause was in the couple group: "whatever one of them buys for themselves is theirs alone" had no rule kind, so Quits approximated it with a rule about one named person. Added `payerCovers` ("whoever bought it pays for it").
+2. **Quits rerun on the same seed** after that change. Quits pulled level. Because the rule language changed after looking at this seed, this is not a fair test, and the README does not lead with it.
+3. **Most specific rule wins.** When two routing rules match one expense (a covering rule and an "only these people" rule), the one with more conditions applies, then the newer one. Found in the couple group of the first seed.
+4. **New seed, code frozen** (seed 20261107, all systems). First-try accuracy tied; the whole-history prompt needed slightly fewer corrections.
+5. **Two correction fixes**, both found in the first seed's second-group scenario, where Quits did worse on the trip after the flat than from scratch. "Ana and Clara don't ski" names two people, and an exclude rule names one, so Quits asked back instead of learning; it now becomes "only the others share ski passes". "Split the fuel between Ana, Ben and Clara, they're the ones in the car" was read as a one-off; a reason that lasts now counts as a habit. Quits rerun on seed 20261107.
+6. **Third seed, all systems** (seed 20261108), with the second-group scenario. Seed 20261107 had been used twice, so the headline moved to bills generated after the last change.

@@ -14,10 +14,12 @@
 | The rule index can be rebuilt from Walrus alone | REPRODUCIBLE | Rules page → Rebuild; `packages/service/test/learning.test.ts` |
 | All Sui reads and writes go through Tatum (gRPC, GraphQL) and bills are priced with Tatum's exchange-rate API | VERIFIED-LIVE | `/proof` call log; `packages/chain/src` |
 | Direct USDC transfers between members are matched to open debts from Tatum's checkpoint stream | REPRODUCIBLE | `apps/worker/test/watcher.test.ts`; worker log |
-| Quits is right the first time on 90.0% of bills vs 89.2% for an LLM given the whole history, with 32× fewer tokens and 38× faster | MODELED | `pnpm eval`, [eval/README.md](eval/README.md) (not held out; see its changelog) |
-| Even splits misallocate $3,110 over a month in the benchmark | MODELED | same |
+| On bills nothing in Quits was tuned on, Quits is right the first time within one bill of an LLM given the whole history, misallocates less money, and uses about 30× fewer model tokens and answers about 40× faster | MODELED | README → Does it actually learn? (rendered from `eval/results/*-fresh.json`); `pnpm eval --seed=20261108` |
+| After its first week in a group, Quits got every benchmark bill right the first time | MODELED | same run, by-week table |
+| A member's own rules follow them into a new group: the trip's first week goes from 50% to 70% right | MODELED | same run, "Memory that follows people"; `--scenarios=trip-after-flat` |
+| Even splits misallocate about $3,000 over a month across the three benchmark groups | MODELED | same run |
 | A memory can live in the member's own Walrus Memory account | REPRODUCIBLE | `/me` → Own your memory; `setOwnMemoryAccount` |
-| Quits is clearly more accurate than an LLM given the full history | NOT-CLAIMED | first-try accuracy ties on the flat and the trip (87.5% each); Quits is ahead on the couple (95% vs 92.5%) and on corrections everywhere |
+| Quits is more accurate than an LLM given the full history | NOT-CLAIMED | on fresh bills it is one bill behind on first-try accuracy (and needs slightly more corrections); it is ahead on money misallocated, cost and speed. Every run, including the ones it lost, is listed in the README |
 | Memories are private from the memory relayer | NOT-CLAIMED | the hosted relayer sees plaintext before it encrypts |
 | Memories last forever | NOT-CLAIMED | Walrus blobs expire after a few epochs; no renewal yet |
 | Sign-in with Google (zkLogin) | NOT-CLAIMED | sign-in is by wallet signature (Slush or any Sui wallet) |

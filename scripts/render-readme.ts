@@ -23,13 +23,19 @@ type Run = {
 const dir = 'eval/results';
 const load = (f: string) => JSON.parse(readFileSync(`${dir}/${f}`, 'utf8'));
 const files = readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'latest.json');
-const v1 = files.find((f) => f.includes('-mercury-3-') && !f.includes('-v2') && !f.includes('heldout'));
-const v2 = files.find((f) => f.includes('-v2'));
-const held = files.find((f) => f.includes('heldout'));
+const byLabel = (label: string) => files.filter((f) => f.endsWith(`-${label}.json`)).sort().at(-1);
+const v1 = files.filter((f) => /-mercury-3-s\d+\.json$/.test(f)).sort()[0];
+const v2 = byLabel('v2');
 if (!v1 || !v2) throw new Error('need the v1 and v2 runs in eval/results');
 
 const main = mergeRuns([load(v1), load(v2)]) as unknown as Run;
-const heldout = held ? (load(held) as Run) : null;
+const heldoutFile = byLabel('heldout');
+const heldoutV3File = byLabel('heldout-v3');
+const v3File = byLabel('v3');
+const freshFile = byLabel('fresh');
+const heldout = heldoutFile ? (load(heldoutFile) as Run) : null;
+const heldoutV3 = heldout && heldoutV3File ? (mergeRuns([load(heldoutFile!), load(heldoutV3File)]) as unknown as Run) : null;
+const fresh = freshFile ? (load(freshFile) as Run) : null;
 
 const names: Record<string, string> = {
   equal: 'Even split (what split apps do)',
@@ -63,42 +69,98 @@ function weeks(r: Run, systems: string[]): string {
   return ['| Right the first time · corrections per 10, by week | Week 1 | Week 2 | Week 3 | Week 4 |', '| --- | ---: | ---: | ---: | ---: |', ...rows].join('\n');
 }
 
-// The held-out run is the headline: its bills were generated from a seed the rule language was never tuned on.
-const head = heldout ?? main;
+// The headline is the newest run on bills nobody looked at while building: seed `fresh`, else the held-out seed.
+const head = fresh ?? heldoutV3 ?? heldout ?? main;
 const eq = head.aggregates.equal!.total;
 const q = head.aggregates.quits!.total;
 const fh = head.aggregates['llm-full-history']!.total;
 const pct = (n: number) => `${n.toFixed(1)}%`;
-const cmp = (a: number, b: number) => (Math.abs(a - b) < 0.05 ? 'as often as' : a > b ? 'more often than' : 'a little less often than');
-const fewer = Number(fh.correctionsPer10) < Number(q.correctionsPer10);
+/** One paragraph, every number computed, no adjective chosen by hand. */
+function summary(): string {
+  const n = q.expenses;
+  const diff = Math.round(((fh.firstTryExactPct - q.firstTryExactPct) * n) / 100);
+  const gap = diff === 0 ? 'the same number of bills' : `${Math.abs(diff)} bill${Math.abs(diff) === 1 ? '' : 's'} ${diff > 0 ? 'more' : 'fewer'} out of ${n}`;
+  return [
+    `Even splits put **${usd(eq.misallocatedUsd)}** in the wrong pocket over the month.`,
+    `Quits gets ${pct(q.firstTryExactPct)} of bills right the first time; an LLM that re-reads the whole group history gets ${pct(fh.firstTryExactPct)} (${gap}).`,
+    `Quits needs ${q.correctionsPer10.toFixed(2)} corrections per 10 bills to the prompt's ${fh.correctionsPer10.toFixed(2)}, and leaves ${usd(q.misallocatedUsd)} misallocated to its ${usd(fh.misallocatedUsd)}.`,
+    `The difference is cost: **${Math.round(fh.tokensPerExpense / q.tokensPerExpense)}× fewer model tokens** and **${Math.round(fh.latencyMsMean / q.latencyMsMean)}× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it.`,
+  ].join(' ');
+}
+
 const lines = [
-  `Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, ${head.config.model}. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01.${heldout ? ` These bills come from seed ${heldout.config.seed}, generated after the rule language was frozen.` : ''} Method and caveats: [eval/README.md](eval/README.md).`,
+  `Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, ${head.config.model}. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01.${head !== main ? ` These bills come from seed ${head.config.seed}, which nothing in Quits was tuned on.` : ''} Method and caveats: [eval/README.md](eval/README.md).`,
   '',
-  table(head, heldout ? ['equal', 'llm-full-history', 'quits'] : order),
+  table(head, head !== main ? ['equal', 'llm-full-history', 'quits'] : order),
   '',
   weeks(head, ['llm-full-history', 'quits']),
   '',
-  `Even splits put **${usd(eq.misallocatedUsd)}** in the wrong pocket over the month. Quits is right the first time ${cmp(q.firstTryExactPct, fh.firstTryExactPct)} an LLM that re-reads the whole group history (${pct(q.firstTryExactPct)} vs ${pct(fh.firstTryExactPct)}), with **${Math.round(fh.tokensPerExpense / q.tokensPerExpense)}× fewer model tokens** and **${Math.round(fh.latencyMsMean / q.latencyMsMean)}× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it.` +
-    (fewer
-      ? ` The whole-history prompt needs slightly fewer corrections (${fh.correctionsPer10.toFixed(2)} vs ${q.correctionsPer10.toFixed(2)} per 10 bills) and leaves ${usd(fh.misallocatedUsd)} misallocated to Quits' ${usd(q.misallocatedUsd)}: re-reading every bill catches a few habits Quits' rule language can't express yet.`
-      : ''),
+  summary(),
 ];
-if (heldout) {
+
+// Same people, second group: the trip after the flat, members' own rules carried over.
+type Scen = { byGroup: Record<string, { total: Agg; byWeek: Agg[] }> };
+const portable = (r: Run & { scenarios?: Record<string, Scen> }) => {
+  const carried = r.scenarios?.['trip-after-flat']?.byGroup.trip;
+  const cold = (r.aggregates.quits as unknown as Scen | undefined)?.byGroup?.trip;
+  return carried && cold ? { carried, cold } : null;
+};
+const port = portable(head as Run & { scenarios?: Record<string, Scen> });
+if (port) {
+  const w1 = (x: { byWeek: Agg[] }) => pct(x.byWeek[0]!.firstTryExactPct);
+  const fhTrip = (head.aggregates['llm-full-history'] as unknown as Scen | undefined)?.byGroup?.trip;
   lines.push(
     '',
-    `**Development run** (seed ${main.config.seed}). This is the run that exposed a missing rule kind (see the changelog in eval/README.md), so it is not a held-out test. It adds two controls: the same LLM with no history, and Quits with memory switched off.`,
-    '',
-    table(main, order),
+    `**Memory that follows people.** When Ana, Ben, Clara and Dan start the trip after a month in the flat, the habits they taught about themselves come with them: the trip's first week is right ${w1(port.carried)} of the time, against ${w1(port.cold)} for the same trip started from nothing, and the trip needs ${port.carried.total.correctionsPer10.toFixed(2)} corrections per 10 bills instead of ${port.cold.total.correctionsPer10.toFixed(2)}.${fhTrip ? ` A prompt holding one group's history starts every new group empty (${w1(fhTrip)} in the trip's first week).` : ''}`,
   );
 }
+
+// Every run, oldest first, so the changes between them are visible.
+const history: { file: string | undefined; what: string; run: Run | null }[] = [
+  { file: v1, what: 'first run', run: load(v1) as Run },
+  { file: v2, what: 'Quits rerun after adding the "whoever bought it pays" rule kind', run: load(v2) as Run },
+  { file: heldoutFile, what: 'new seed, code frozen', run: heldout },
+  { file: heldoutV3File, what: 'Quits rerun after two correction fixes found in the first seed', run: heldoutV3File ? (load(heldoutV3File) as Run) : null },
+  { file: freshFile, what: 'third seed, all systems', run: fresh },
+];
+const rows = history
+  .filter((h) => h.file && h.run)
+  .map((h) => {
+    const r = h.run!;
+    const cell = (s: string) => (r.aggregates[s] ? `${pct(r.aggregates[s]!.total.firstTryExactPct)} · ${r.aggregates[s]!.total.correctionsPer10.toFixed(2)}` : '–');
+    return `| [${r.runId}](eval/results/${h.file}) | ${r.config.seed} | ${h.what} | ${cell('llm-full-history')} | ${cell('quits')} |`;
+  });
+lines.push(
+  '',
+  '<details><summary>Every run so far</summary>',
+  '',
+  '| Run | Seed | What changed | Whole-history LLM: right first time · corrections/10 | Quits |',
+  '| --- | ---: | --- | ---: | ---: |',
+  ...rows,
+  '',
+  `The first seed (${main.config.seed}) is where the rule language was shaped, so it is not a fair test; it also holds the two controls (the same LLM with no history, and Quits with memory switched off):`,
+  '',
+  table(main, order),
+  '',
+  '</details>',
+);
 const block = lines.join('\n');
 
-const readme = readFileSync('README.md', 'utf8');
+// One line under the title, also computed: what even splits cost, and how often Quits was right once taught.
+const later = (head.aggregates.quits!.byWeek as (Agg & { firstTryExact?: number })[]).slice(1);
+const laterRight = later.reduce((n, w) => n + (w.firstTryExact ?? Math.round((w.firstTryExactPct * w.expenses) / 100)), 0);
+const laterAll = later.reduce((n, w) => n + w.expenses, 0);
+const hook = `In a month of simulated group bills, even splits put **${usd(eq.misallocatedUsd)}** in the wrong pocket. After its first week, Quits split ${laterRight} of ${laterAll} bills right the first time, using ${Math.round(fh.tokensPerExpense / q.tokensPerExpense)}× fewer model tokens than an LLM re-reading the group's history. [How we measured](#does-it-actually-learn)`;
+
+let readme = readFileSync('README.md', 'utf8');
+const h0 = '<!-- headline:start -->';
+const h1 = '<!-- headline:end -->';
+if (readme.includes(h0) && readme.includes(h1)) readme = `${readme.slice(0, readme.indexOf(h0) + h0.length)}\n${hook}\n${readme.slice(readme.indexOf(h1))}`;
 const start = '<!-- results:start -->';
 const end = '<!-- results:end -->';
 const a = readme.indexOf(start);
 const b = readme.indexOf(end);
 if (a < 0 || b < 0) throw new Error('README.md has no results markers');
 writeFileSync('README.md', `${readme.slice(0, a + start.length)}\n${block}\n${readme.slice(b)}`);
-console.log(`README results updated from ${main.runId}${heldout ? ` and ${heldout.runId}` : ''}`);
+console.log(`README results updated; headline ${head.runId}`);
 if (existsSync('README.md')) console.log(`headline: even split ${usd(eq.misallocatedUsd)} misallocated; quits ${q.firstTryExactPct}% vs full history ${fh.firstTryExactPct}%`);
