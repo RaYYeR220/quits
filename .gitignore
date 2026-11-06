@@ -1,0 +1,31 @@
+# dependencies / builds
+node_modules/
+.pnpm-store/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+.vercel/
+
+# move
+move/**/build/
+move/**/.trace
+move/**/Move.lock.bak
+
+# env + secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+keystore*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

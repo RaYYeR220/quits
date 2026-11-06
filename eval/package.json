@@ -1,0 +1,14 @@
+{
+  "name": "@quits/eval",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@quits/core": "workspace:*",
+    "@quits/llm": "workspace:*",
+    "@quits/memory": "workspace:*"
+  }
+}

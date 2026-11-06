@@ -1,0 +1,22 @@
+{
+  "name": "@quits/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@quits/service": "workspace:*",
+    "@quits/core": "workspace:*",
+    "@quits/memory": "workspace:*",
+    "@quits/chain": "workspace:*",
+    "@quits/pay": "workspace:*",
+    "@quits/db": "workspace:*",
+    "@mysten/sui": "^2.39.0",
+    "grammy": "^1.38.0"
+  }
+}

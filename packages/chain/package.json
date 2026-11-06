@@ -1,0 +1,16 @@
+{
+  "name": "@quits/chain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mysten/sui": "^2.39.0",
+    "@protobuf-ts/grpc-transport": "^2.11.1",
+    "@protobuf-ts/runtime-rpc": "^2.11.1",
+    "@grpc/grpc-js": "^1.14.0",
+    "@quits/core": "workspace:*"
+  }
+}
