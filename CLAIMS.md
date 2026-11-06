@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | The settlement contract is live on Sui mainnet and names our agent and registrar | VERIFIED-LIVE | `pnpm verify:onchain`, [PROOF.md](PROOF.md) |
 | A member paid a debt over x402 with a gasless USDC transfer on mainnet | VERIFIED-LIVE | PROOF.md → Payments |
+| A member signed in with their own wallet, paid a debt over x402 and signed an auto-settle mandate, all on mainnet | VERIFIED-LIVE | PROOF.md → Payments; rerun `scripts/smoke-wallet.ts` (fresh wallets, 18 checks) |
 | An agent paid a debt from a member's Sui Allowance, only through `quits::settle` | VERIFIED-LIVE | PROOF.md; Move tests `move/quits/tests` |
 | The contract refuses a wrong amount, a non-agent spender, a second payment, a debt to an unlisted person, a pull inside the objection window, an over-cap pull | REPRODUCIBLE | `pnpm move:test` (23 tests) |
 | Every split decision reads its rules back from Walrus Memory and cites the blob | VERIFIED-LIVE | any proposal's "why" chips; `packages/service/src/learned.ts` |
@@ -19,4 +20,4 @@
 | Quits is clearly more accurate than an LLM given the full history | NOT-CLAIMED | first-try accuracy ties on the flat and the trip (87.5% each); Quits is ahead on the couple (95% vs 92.5%) and on corrections everywhere |
 | Memories are private from the memory relayer | NOT-CLAIMED | the hosted relayer sees plaintext before it encrypts |
 | Memories last forever | NOT-CLAIMED | Walrus blobs expire after a few epochs; no renewal yet |
-| Sign-in with Google (zkLogin) | NOT-CLAIMED | wallet sign-in only |
+| Sign-in with Google (zkLogin) | NOT-CLAIMED | sign-in is by wallet signature (Slush or any Sui wallet) |

@@ -12,7 +12,7 @@ Quits remembers. You log a bill in plain words; Quits proposes who owes what and
 
 1. **Log it in plain words.** "412 zł dinner at Pod Baranami, Clara paid, 140 of it was wine." Quits reads the payer, the currency (priced to USDC through Tatum's exchange-rate API), and the line items.
 2. **Correct it once.** "Ana doesn't drink." The correction becomes a typed rule and a Walrus Memory memory. A one-off fact ("Dan wasn't there tonight") fixes that bill and teaches nothing.
-3. **Settle in one tap, or let your agent do it.** Every debt is an [x402](https://x402.org) resource (and an MPP challenge) settled in USDC on Sui mainnet. Turn on auto-settle and your agent pays from a Sui Allowance: only the exact debt, only to people you named, at most 2 USDC a week, with a window to object first. The Move contract enforces each of those, not our server.
+3. **Settle in one tap, or let your agent do it.** Every debt is an [x402](https://x402.org) resource (and an MPP challenge) settled in USDC on Sui mainnet. Turn on auto-settle and your agent pays from a Sui Allowance: only the exact debt, only to people in the group, never more than the weekly limit you signed, with a window to object first. The Move contract enforces each of those, not our server.
 
 ## Does it actually learn?
 
@@ -119,7 +119,7 @@ Without a database URL the app runs on in-process Postgres; without Walrus Memor
 ## Honest limits
 
 - The benchmark's members are simulated and their habits are written in the rule language Quits learns; see [eval/README.md](eval/README.md).
-- The demo flatmates pay from server-held wallets with small balances and a 1 USDC per-debt cap; real members sign in with a Sui wallet.
+- The demo flatmates pay from server-held wallets with small balances and a 1 USDC per-debt cap. Real members sign in with Slush or any Sui wallet, pay from it and sign their own mandate; `scripts/smoke-wallet.ts` runs that whole path on mainnet with two fresh wallets.
 - Walrus Memory blobs expire after a few epochs; Quits does not renew them yet.
 - The hosted memory relayer sees memory text in plain form before it encrypts it.
 
