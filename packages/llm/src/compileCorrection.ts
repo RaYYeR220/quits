@@ -49,8 +49,9 @@ const SYSTEM = `A group splits shared expenses. A member just corrected how one 
 First decide: is this a general habit that should apply to future expenses, or a fact about this one expense only?
 - One-off facts ("Dan wasn't there", "actually Ben paid", "Clara left early") -> status "once" with once.absent (member ids who weren't part of it) and/or once.payer. Do not invent a rule for these.
 - Habits and traits ("Ana doesn't drink", "rent goes by room size", "Ben always covers taxis") -> status "rule" with ONE rule.
+A reason that lasts beyond tonight makes it a habit even without "always": "they're the ones in the car", "Dan and Eve take the train", "Ana and Clara don't ski", "she has her own room". Use "once" only when the sentence is about this occasion (someone wasn't there, left early, a different payer, "this time", "tonight").
 Rule kinds:
-- exclude {member, when}: the member pays nothing for matching expenses or items ("Ana doesn't drink" -> exclude ana when tags [alcohol]).
+- exclude {member, when}: the member pays nothing for matching expenses or items ("Ana doesn't drink" -> exclude ana when tags [alcohol]). For several people at once, list them in members.
 - only {members, when}: only these members share matching expenses or items.
 - weights {weights: [{member, weight}], when}: split matching expenses in proportion ("rent by room size 40/20/20/20").
 - covers {member, when}: that member always pays all of matching expenses ("Ben always covers taxis").
@@ -70,6 +71,22 @@ function unknownMembers(rule: NonNullable<z.infer<typeof Out>['rule']>, ids: Set
     rule.when.payer ?? null,
   ].filter((x): x is string => typeof x === 'string');
   return named.filter((m) => !ids.has(m));
+}
+
+type RawRule = NonNullable<z.infer<typeof Out>['rule']>;
+
+/**
+ * An exclude names one person. "Ana and Clara don't ski" leaves several out, which
+ * is the same as sharing those expenses among everyone else in the group.
+ * Returns null when nobody would be left to pay.
+ */
+function excludeToOnly(rule: RawRule, members: Member[]): RawRule | null {
+  if (rule.kind !== 'exclude') return rule;
+  const out = [...new Set([...(rule.member ? [rule.member] : []), ...(rule.members ?? [])])];
+  if (out.length <= 1) return { ...rule, member: out[0] ?? rule.member, members: null };
+  const rest = members.map((m) => m.id).filter((id) => !out.includes(id));
+  if (rest.length === 0) return null;
+  return { ...rule, kind: 'only', member: null, members: rest };
 }
 
 export async function compileCorrection(llm: Llm, text: string, ctx: CorrectionContext): Promise<CompiledCorrection> {
@@ -98,7 +115,8 @@ export async function compileCorrection(llm: Llm, text: string, ctx: CorrectionC
     return { ok: false, clarify: `I don't know who "${strangers[0]}" is in this group. Who did you mean?` };
   }
 
-  const r = out.rule;
+  const r = excludeToOnly(out.rule, ctx.members);
+  if (!r) return { ok: false, clarify: 'Who should still pay for these?' };
   const when = {
     ...(r.when.category?.length ? { category: [...new Set(r.when.category)] } : {}),
     ...(r.when.tags?.length ? { tags: [...new Set(r.when.tags)] } : {}),

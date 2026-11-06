@@ -4,7 +4,8 @@
     "agentId": "951edfde65ae7bd307148bd7e7ed5beed9bfc960958ae7fb7f0e153982cf2505"
   },
   "walletPayments": [
-    "5eWczSwa9vxiLsfvWy1p4fcm2girFRQ3EdWKGEHN6hJ2"
+    "5eWczSwa9vxiLsfvWy1p4fcm2girFRQ3EdWKGEHN6hJ2",
+    "5jnLqfRUJ2WvkRG8A4E2CzxCvW46ckqW6gnho9YqKanD"
   ],
   "agentPayments": [
     "4ax2Bq9CFiu9Wyu4CS3sMdGZUMdhJoxjWvZq2ntryw8j"
@@ -21,10 +22,15 @@
     {
       "mandate": "0xd6e38d9de9a0c685898cf1e0e3296286784bd292316c605a65b391c14398b9ef",
       "allowance": "0xd7346c442b00a3e9b2dcf3444f3507f1a38985aefb4edab5dadd17cc778c0472"
+    },
+    {
+      "mandate": "0xd688af06b6c0d178b78ac88ce70a83806af452e96ab98c568e5ade0099664c5a",
+      "allowance": "0x0b229fac4aeaca55925272b5f544f56df19cd55cac759584274777883db34e8d"
     }
   ],
   "notes": {
     "recordDebtTx": "AgCSHqvWUGJ1CKNsLBdyC6V6CuQg1SxLVGvebM5nmjW4",
-    "openMandateTx": "55iv8MxbCiuPyNSXKai8XAHy5wJ3Q7nzMgDNn3HPzejm"
+    "openMandateTx": "55iv8MxbCiuPyNSXKai8XAHy5wJ3Q7nzMgDNn3HPzejm",
+    "memberWalletMandateTx": "BKM6iyH7kZur6ByDXVrZ3hnHCVfq1pmCE5ixBigh9Msk"
   }
 }

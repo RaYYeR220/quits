@@ -17,7 +17,22 @@ Quits remembers. You log a bill in plain words; Quits proposes who owes what and
 ## Does it actually learn?
 
 <!-- results:start -->
-Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, mercury-3, seed 20261106. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01. Full method and caveats: [eval/README.md](eval/README.md).
+Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, mercury-3. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01. These bills come from seed 20261107, generated after the rule language was frozen. Method and caveats: [eval/README.md](eval/README.md).
+
+| | Right the first time | Corrections per 10 bills | Misallocated if nobody corrected | Still wrong after 2 corrections | Model tokens per bill | Time per bill |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Even split (what split apps do) | 13.3% | 17.33 | $2,855.44 | 104 | 0 | 1 ms |
+| LLM with the whole group history in the prompt | 87.5% | 1.25 | $449.33 | 0 | 11,677 | 21.3 s |
+| **Quits** | 87.5% | 1.33 | $493.34 | 0 | 601 | 1.0 s |
+
+| Right the first time · corrections per 10, by week | Week 1 | Week 2 | Week 3 | Week 4 |
+| --- | ---: | ---: | ---: | ---: |
+| LLM with the whole group history in the prompt | 57% · 4.3 corr. | 97% · 0.3 corr. | 97% · 0.3 corr. | 100% · 0.0 corr. |
+| **Quits** | 60% · 4.0 corr. | 97% · 0.3 corr. | 97% · 0.7 corr. | 97% · 0.3 corr. |
+
+Even splits put **$2,855.44** in the wrong pocket over the month. Quits is right the first time as often as an LLM that re-reads the whole group history (87.5% vs 87.5%), with **19× fewer model tokens** and **21× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it. The whole-history prompt needs slightly fewer corrections (1.25 vs 1.33 per 10 bills) and leaves $449.33 misallocated to Quits' $493.34: re-reading every bill catches a few habits Quits' rule language can't express yet.
+
+**Development run** (seed 20261106). This is the run that exposed a missing rule kind (see the changelog in eval/README.md), so it is not a held-out test. It adds two controls: the same LLM with no history, and Quits with memory switched off.
 
 | | Right the first time | Corrections per 10 bills | Misallocated if nobody corrected | Still wrong after 2 corrections | Model tokens per bill | Time per bill |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -26,13 +41,6 @@ Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 4
 | LLM with the whole group history in the prompt | 89.2% | 1.33 | $539.00 | 2 | 11,698 | 23.0 s |
 | **Quits** | 90.0% | 1.08 | $523.23 | 0 | 367 | 606 ms |
 | Quits with memory switched off | 16.7% | 16.25 | $3,110.36 | 94 | 6,077 | 9.0 s |
-
-| Right the first time · corrections per 10, by week | Week 1 | Week 2 | Week 3 | Week 4 |
-| --- | ---: | ---: | ---: | ---: |
-| LLM with the whole group history in the prompt | 63% · 4.7 corr. | 93% · 0.7 corr. | 100% · 0.0 corr. | 100% · 0.0 corr. |
-| **Quits** | 60% · 4.3 corr. | 100% · 0.0 corr. | 100% · 0.0 corr. | 100% · 0.0 corr. |
-
-Even splits put **$3,110.36** in the wrong pocket over the month. Quits ended at $523.23 (all of it in week 1, before each habit had been taught once), on par with the whole-history prompt at $539.00, using **32× fewer model tokens** and answering **38× faster**, because the model only runs when someone corrects a split.
 <!-- results:end -->
 
 ## How it's built

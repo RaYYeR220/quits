@@ -53,6 +53,29 @@ describe('compileCorrection', () => {
     expect(r.ok && 'rule' in r && r.scope).toBe('group');
   });
 
+  it('leaves several people out by sharing among everyone else', async () => {
+    const out = {
+      status: 'rule',
+      scope: 'group',
+      sentence: 'Ana and Clara don’t ski, so they skip the passes.',
+      rule: { kind: 'exclude', members: ['ana', 'clara'], when: { tags: ['ski'] } },
+    };
+    const r = await compileCorrection(fakeLlm([out]), 'Ana and Clara don’t ski, leave them out of the passes', ctx);
+    expect(r).toMatchObject({ ok: true, scope: 'group', rule: { kind: 'only', members: ['ben', 'dan'], when: { tags: ['ski'] } } });
+  });
+
+  it('accepts one excluded person given as a list', async () => {
+    const out = { status: 'rule', scope: 'member', sentence: 'Ana doesn’t drink.', rule: { kind: 'exclude', members: ['ana'], when: { tags: ['alcohol'] } } };
+    const r = await compileCorrection(fakeLlm([out]), 'Ana doesn’t drink', ctx);
+    expect(r).toMatchObject({ ok: true, scope: 'member', rule: { kind: 'exclude', member: 'ana' } });
+  });
+
+  it('asks back rather than leaving everyone out', async () => {
+    const out = { status: 'rule', scope: 'group', rule: { kind: 'exclude', members: ['ana', 'ben', 'clara', 'dan'], when: { category: ['fuel'] } } };
+    const r = await compileCorrection(fakeLlm([out]), 'nobody pays for fuel', ctx);
+    expect(r.ok).toBe(false);
+  });
+
   it('asks back when the correction is ambiguous', async () => {
     const r = await compileCorrection(fakeLlm([{ status: 'clarify', clarify: 'Who should be left out?' }]), 'that’s wrong', ctx);
     expect(r).toEqual({ ok: false, clarify: 'Who should be left out?' });

@@ -74,7 +74,7 @@ for (const m of proof.mandates ?? []) {
   try {
     const [md, al] = await Promise.all([readMandate(client, m.mandate, { pkg: dep.package }), readAllowance(client, m.allowance)]);
     ok(
-      `Mandate ${m.mandate.slice(0, 10)}…: funder ${md.funder.slice(0, 8)}…, ${md.creditors.length} creditors, ≤ ${(Number(md.maxPerDebt) / 1e6).toFixed(2)} USDC per debt, ${md.objectionWindowMs / 1000}s to object; allowance spent ${(Number(al.spent) / 1e6).toFixed(2)} of ${al.lifetimeCap === null ? '∞' : (Number(al.lifetimeCap) / 1e6).toFixed(2)} USDC, spender ${al.spender?.slice(0, 8)}…`,
+      `Mandate ${m.mandate.slice(0, 10)}…: funder ${md.funder.slice(0, 8)}…, ${md.creditors.length} creditor${md.creditors.length === 1 ? "" : "s"}, ≤ ${(Number(md.maxPerDebt) / 1e6).toFixed(2)} USDC per debt, ${md.objectionWindowMs / 1000}s to object; allowance spent ${(Number(al.spent) / 1e6).toFixed(2)} of ${al.lifetimeCap === null ? '∞' : (Number(al.lifetimeCap) / 1e6).toFixed(2)} USDC, spender ${al.spender?.slice(0, 8)}…`,
     );
     if (al.spender !== dep.agent) bad(`allowance ${m.allowance} spender is not the Quits agent`);
   } catch (e) {

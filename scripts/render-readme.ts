@@ -63,26 +63,32 @@ function weeks(r: Run, systems: string[]): string {
   return ['| Right the first time · corrections per 10, by week | Week 1 | Week 2 | Week 3 | Week 4 |', '| --- | ---: | ---: | ---: | ---: |', ...rows].join('\n');
 }
 
-const eq = main.aggregates.equal!.total;
-const q = main.aggregates.quits!.total;
-const fh = main.aggregates['llm-full-history']!.total;
-const q1 = Number(main.aggregates.quits!.byWeek[0]?.misallocatedUsd ?? 0);
-const week1Share = Number(q.misallocatedUsd) > 0 ? Math.round((q1 / Number(q.misallocatedUsd)) * 100) : 0;
+// The held-out run is the headline: its bills were generated from a seed the rule language was never tuned on.
+const head = heldout ?? main;
+const eq = head.aggregates.equal!.total;
+const q = head.aggregates.quits!.total;
+const fh = head.aggregates['llm-full-history']!.total;
+const pct = (n: number) => `${n.toFixed(1)}%`;
+const cmp = (a: number, b: number) => (Math.abs(a - b) < 0.05 ? 'as often as' : a > b ? 'more often than' : 'a little less often than');
+const fewer = Number(fh.correctionsPer10) < Number(q.correctionsPer10);
 const lines = [
-  `Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, ${main.config.model}, seed ${main.config.seed}. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01. Full method and caveats: [eval/README.md](eval/README.md).`,
+  `Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 40 bills each, ${head.config.model}. A simulated member corrects a wrong split in plain words, up to twice per bill. "Right" means every share within $0.01.${heldout ? ` These bills come from seed ${heldout.config.seed}, generated after the rule language was frozen.` : ''} Method and caveats: [eval/README.md](eval/README.md).`,
   '',
-  table(main, order),
+  table(head, heldout ? ['equal', 'llm-full-history', 'quits'] : order),
   '',
-  weeks(main, ['llm-full-history', 'quits']),
+  weeks(head, ['llm-full-history', 'quits']),
   '',
-  `Even splits put **${usd(eq.misallocatedUsd)}** in the wrong pocket over the month. Quits ended at ${usd(q.misallocatedUsd)} (${week1Share === 100 ? 'all' : `${week1Share}%`} of it in week 1, before each habit had been taught once), on par with the whole-history prompt at ${usd(fh.misallocatedUsd)}, using **${Math.round(fh.tokensPerExpense / q.tokensPerExpense)}× fewer model tokens** and answering **${Math.round(fh.latencyMsMean / q.latencyMsMean)}× faster**, because the model only runs when someone corrects a split.`,
+  `Even splits put **${usd(eq.misallocatedUsd)}** in the wrong pocket over the month. Quits is right the first time ${cmp(q.firstTryExactPct, fh.firstTryExactPct)} an LLM that re-reads the whole group history (${pct(q.firstTryExactPct)} vs ${pct(fh.firstTryExactPct)}), with **${Math.round(fh.tokensPerExpense / q.tokensPerExpense)}× fewer model tokens** and **${Math.round(fh.latencyMsMean / q.latencyMsMean)}× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it.` +
+    (fewer
+      ? ` The whole-history prompt needs slightly fewer corrections (${fh.correctionsPer10.toFixed(2)} vs ${q.correctionsPer10.toFixed(2)} per 10 bills) and leaves ${usd(fh.misallocatedUsd)} misallocated to Quits' ${usd(q.misallocatedUsd)}: re-reading every bill catches a few habits Quits' rule language can't express yet.`
+      : ''),
 ];
 if (heldout) {
   lines.push(
     '',
-    `**Fresh data.** The run above is the one that exposed a gap in the rule language (see the changelog in eval/README.md), so it is not a held-out test. On new bills (seed ${heldout.config.seed}) with the current code:`,
+    `**Development run** (seed ${main.config.seed}). This is the run that exposed a missing rule kind (see the changelog in eval/README.md), so it is not a held-out test. It adds two controls: the same LLM with no history, and Quits with memory switched off.`,
     '',
-    table(heldout, ['equal', 'llm-full-history', 'quits']),
+    table(main, order),
   );
 }
 const block = lines.join('\n');
