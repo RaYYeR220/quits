@@ -18,7 +18,7 @@ const Out = z.object({
   sentence: nullish(z.string()),
   rule: nullish(
     z.object({
-      kind: z.enum(['exclude', 'only', 'weights', 'covers', 'payerExcluded']),
+      kind: z.enum(['exclude', 'only', 'weights', 'covers', 'payerExcluded', 'payerCovers']),
       member: nullish(z.string()),
       members: nullish(z.array(z.string())),
       weights: nullish(z.array(z.object({ member: z.string(), weight: z.number() }))),
@@ -55,6 +55,7 @@ Rule kinds:
 - weights {weights: [{member, weight}], when}: split matching expenses in proportion ("rent by room size 40/20/20/20").
 - covers {member, when}: that member always pays all of matching expenses ("Ben always covers taxis").
 - payerExcluded {when}: whoever paid owes nothing for matching expenses.
+- payerCovers {when}: whoever paid bears all of matching expenses or items ("personal stuff is on whoever bought it"). Prefer this over covers when the rule is about the buyer, not one named person.
 when may set category (from: ${CATEGORIES.join(', ')}), tags (from: ${TAGS.join(', ')}), payer (a member id). Keep it as general as the person meant.
 Set revoked: true when the person says an earlier rule no longer holds ("Ana drinks now").
 scope is "member" for a personal trait that should follow the member to every group (diet, alcohol); otherwise "group".
@@ -111,7 +112,7 @@ export async function compileCorrection(llm: Llm, text: string, ctx: CorrectionC
         ? { ...base, kind: r.kind, members: r.members }
         : r.kind === 'weights'
           ? { ...base, kind: r.kind, weights: Object.fromEntries((r.weights ?? []).map((w) => [w.member, w.weight])) }
-          : { ...base, kind: r.kind };
+          : { ...base, kind: r.kind as 'payerExcluded' | 'payerCovers' };
 
   const parsed = RuleSchema.safeParse(candidate);
   if (!parsed.success) return { ok: false, clarify: 'I couldn’t turn that into a rule. Could you say it another way?' };

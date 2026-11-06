@@ -74,6 +74,16 @@ describe('split', () => {
     expect(r.shares).toEqual({ ana: u('45'), ben: u('45'), clara: u('5'), dan: u('5') });
   });
 
+  it('puts personal items on whoever bought them, with the rest by weights', () => {
+    const rules = [
+      rule({ kind: 'weights', weights: { fin: 60, gia: 40 }, when: {} }),
+      rule({ kind: 'payerCovers', when: { tags: ['personal'] } }),
+    ];
+    const base = { participants: ['fin', 'gia'], category: 'groceries' as const, items: [{ label: 'razor', usdcMicro: u('10'), tags: ['personal' as const] }] };
+    expect(split(expense({ usdc: '60.00', payerId: 'gia', ...base }), rules).shares).toEqual({ fin: u('30'), gia: u('30') });
+    expect(split(expense({ usdc: '60.00', payerId: 'fin', ...base }), rules).shares).toEqual({ fin: u('40'), gia: u('20') });
+  });
+
   it('lets covers win over exclude', () => {
     const e = expense({ usdc: '20.00', category: 'taxi' });
     const r = split(e, [

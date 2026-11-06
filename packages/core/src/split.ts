@@ -38,7 +38,8 @@ function latest(rs: Rule[]): Rule | undefined {
  *
  * The expense is cut into units: one per tagged line item plus the untagged
  * remainder. For each unit the matching rules apply in this order:
- * `covers` (one member takes it all) > `only` > `exclude` / `payerExcluded` > `weights` > equal.
+ * `covers` (one member takes it all) > `payerCovers` (the payer takes it all) > `only` >
+ * `exclude` / `payerExcluded` > `weights` > equal.
  * Rules naming people who aren't participants are ignored. If the rules leave
  * nobody to pay a unit, that unit is split equally and `conflict` is set.
  */
@@ -67,9 +68,13 @@ export function split(e: Expense, rules: readonly Rule[]): SplitResult {
     let weights: Record<MemberId, number>;
 
     const cover = latest(hits.filter((r) => r.kind === 'covers' && present.has(r.member)));
+    const payerCover = present.has(e.payerId) ? latest(hits.filter((r) => r.kind === 'payerCovers')) : undefined;
     if (cover && cover.kind === 'covers') {
       weights = { [cover.member]: 1 };
       used.push(cover);
+    } else if (payerCover) {
+      weights = { [e.payerId]: 1 };
+      used.push(payerCover);
     } else {
       let set = new Set(people);
       const only = latest(hits.filter((r) => r.kind === 'only'));

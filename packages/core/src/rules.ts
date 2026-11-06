@@ -32,6 +32,8 @@ export const RuleSchema = z.discriminatedUnion('kind', [
     .strict(),
   z.object({ ...base, kind: z.literal('covers'), member: z.string().min(1) }).strict(),
   z.object({ ...base, kind: z.literal('payerExcluded') }).strict(),
+  /** Whoever paid bears all of it ("personal stuff is on whoever bought it"). */
+  z.object({ ...base, kind: z.literal('payerCovers') }).strict(),
 ]);
 export type Rule = z.infer<typeof RuleSchema>;
 export type RuleKind = Rule['kind'];
@@ -47,7 +49,7 @@ function normalizedWhen(w: When): string {
 /**
  * Identity of a rule for supersession. Two rules with the same key cannot both be
  * active; the one learned later wins. `exclude` is per member; `covers`, `only`,
- * `weights` and `payerExcluded` are per condition (a new coverer replaces the old one).
+ * `weights`, `payerExcluded` and `payerCovers` are per condition (a new coverer replaces the old one).
  */
 export function ruleKey(r: Rule): string {
   const subject = r.kind === 'exclude' ? r.member : '';
@@ -78,6 +80,7 @@ export function ruleMembers(r: Rule): string[] {
     case 'weights':
       return Object.keys(r.weights);
     case 'payerExcluded':
+    case 'payerCovers':
       return [];
   }
 }
