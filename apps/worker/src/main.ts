@@ -9,6 +9,7 @@ import { autoSettleOnce } from './autosettle.ts';
 import { followCheckpoints } from './stream.ts';
 import { createTelegramBot } from './telegram.ts';
 import { matchExternalPayment } from './watcher.ts';
+import { rebalanceDemoWallets } from './demo-wallets.ts';
 
 const env = (k: string) => process.env[k]?.trim() || undefined;
 const log = (msg: string, extra: Record<string, unknown> = {}) => console.log(JSON.stringify({ t: new Date().toISOString(), msg, ...extra }));
@@ -90,6 +91,12 @@ jobs.push(
     },
   }),
 );
+
+const demoKeys = ['ANA', 'BEN', 'CLARA', 'DAN'].map((m) => env(`QUITS_DEMO_${m}_KEY`)).filter((k): k is string => Boolean(k));
+if (demoKeys.length === 4 && network === 'mainnet') {
+  const wallets = demoKeys.map((k) => Ed25519Keypair.fromSecretKey(k));
+  jobs.push(every('demo wallets', 300_000, () => rebalanceDemoWallets(sui.client, wallets, usdcType).then((r) => ({ ...r, moved: Number(r.moved) }))));
+}
 
 const tg = env('TELEGRAM_BOT_TOKEN');
 if (tg) {
