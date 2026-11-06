@@ -14,12 +14,12 @@
 | The rule index can be rebuilt from Walrus alone | REPRODUCIBLE | Rules page → Rebuild; `packages/service/test/learning.test.ts` |
 | All Sui reads and writes go through Tatum (gRPC, GraphQL) and bills are priced with Tatum's exchange-rate API | VERIFIED-LIVE | `/proof` call log; `packages/chain/src` |
 | Direct USDC transfers between members are matched to open debts from Tatum's checkpoint stream | REPRODUCIBLE | `apps/worker/test/watcher.test.ts`; worker log |
-| On bills nothing in Quits was tuned on, Quits is right the first time within one bill of an LLM given the whole history, misallocates less money, and uses about 30× fewer model tokens and answers about 40× faster | MODELED | README → Does it actually learn? (rendered from `eval/results/*-fresh.json`); `pnpm eval --seed=20261108` |
+| On bills nothing in Quits was tuned on, Quits is right the first time as often as an LLM given the whole history (90.0% each, same number of corrections), misallocates slightly less money, and uses about 40× fewer model tokens and answers about 50× faster | MODELED | README → Does it actually learn? (rendered from `eval/results/*-fresh-cents.json`); `pnpm eval --seed=20261108` |
 | After its first week in a group, Quits got every benchmark bill right the first time | MODELED | same run, by-week table |
 | A member's own rules follow them into a new group: the trip's first week goes from 50% to 70% right | MODELED | same run, "Memory that follows people"; `--scenarios=trip-after-flat` |
 | Even splits misallocate about $3,000 over a month across the three benchmark groups | MODELED | same run |
 | A memory can live in the member's own Walrus Memory account | REPRODUCIBLE | `/me` → Own your memory; `setOwnMemoryAccount` |
-| Quits is more accurate than an LLM given the full history | NOT-CLAIMED | on fresh bills it is one bill behind on first-try accuracy (and needs slightly more corrections); it is ahead on money misallocated, cost and speed. Every run, including the ones it lost, is listed in the README |
+| Quits is more accurate than an LLM given the full history | NOT-CLAIMED | on fresh bills they tie on first-try accuracy and corrections; Quits is ahead on money misallocated, cost and speed. Every run, including the ones it lost, is listed in the README |
 | Memories are private from the memory relayer | NOT-CLAIMED | the hosted relayer sees plaintext before it encrypts |
 | Memories last forever | NOT-CLAIMED | Walrus blobs expire after a few epochs; no renewal yet |
 | Sign-in with Google (zkLogin) | NOT-CLAIMED | sign-in is by wallet signature (Slush or any Sui wallet) |

@@ -3,7 +3,7 @@
 **The group tab that learns your unwritten rules, and settles itself.**
 
 <!-- headline:start -->
-In a month of simulated group bills, even splits put **$3,008.34** in the wrong pocket. After its first week, Quits split 90 of 90 bills right the first time, using 31× fewer model tokens than an LLM re-reading the group's history. [How we measured](#does-it-actually-learn)
+In a month of simulated group bills, even splits put **$3,008.16** in the wrong pocket. After its first week, Quits split 90 of 90 bills right the first time, using 39× fewer model tokens than an LLM re-reading the group's history. [How we measured](#does-it-actually-learn)
 <!-- headline:end -->
 
 Every group has rules nobody wrote down. Ana doesn't drink. Ben always gets the taxi. Rent goes by room size, and Dan isn't on the Netflix account. Split apps make you re-enter that every single time, or they split evenly and quietly overcharge someone.
@@ -32,18 +32,18 @@ Three simulated groups (a flat of four, a trip of five, a couple), four weeks, 4
 
 | | Right the first time | Corrections per 10 bills | Misallocated if nobody corrected | Still wrong after 2 corrections | Model tokens per bill | Time per bill |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Even split (what split apps do) | 10.8% | 17.83 | $3,008.34 | 107 | 0 | 0 ms |
-| LLM with the whole group history in the prompt | 90.8% | 0.92 | $439.14 | 0 | 10,079 | 17.8 s |
-| **Quits** | 90.0% | 1.00 | $417.55 | 0 | 321 | 408 ms |
+| Even split (what split apps do) | 10.8% | 17.83 | $3,008.16 | 107 | 0 | 0 ms |
+| LLM with the whole group history in the prompt | 90.0% | 1.00 | $422.00 | 0 | 10,592 | 20.4 s |
+| **Quits** | 90.0% | 1.00 | $417.53 | 0 | 269 | 390 ms |
 
 | Right the first time · corrections per 10, by week | Week 1 | Week 2 | Week 3 | Week 4 |
 | --- | ---: | ---: | ---: | ---: |
-| LLM with the whole group history in the prompt | 67% · 3.3 corr. | 100% · 0.0 corr. | 97% · 0.3 corr. | 100% · 0.0 corr. |
+| LLM with the whole group history in the prompt | 63% · 3.7 corr. | 100% · 0.0 corr. | 97% · 0.3 corr. | 100% · 0.0 corr. |
 | **Quits** | 60% · 4.0 corr. | 100% · 0.0 corr. | 100% · 0.0 corr. | 100% · 0.0 corr. |
 
-Even splits put **$3,008.34** in the wrong pocket over the month. Quits gets 90.0% of bills right the first time; an LLM that re-reads the whole group history gets 90.8% (1 bill more out of 120). Quits needs 1.00 corrections per 10 bills to the prompt's 0.92, and leaves $417.55 misallocated to its $439.14. The difference is cost: **31× fewer model tokens** and **44× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it.
+Even splits put **$3,008.16** in the wrong pocket over the month. Quits gets 90.0% of bills right the first time; an LLM that re-reads the whole group history gets 90.0% (the same number of bills). Quits needs 1.00 corrections per 10 bills to the prompt's 1.00, and leaves $417.53 misallocated to its $422.00. The difference is cost: **39× fewer model tokens** and **52× faster**, because the model only runs when someone corrects a split, and every answer names the rule and the memory behind it.
 
-**Memory that follows people.** When Ana, Ben, Clara and Dan start the trip after a month in the flat, the habits they taught about themselves come with them: the trip's first week is right 70.0% of the time, against 50.0% for the same trip started from nothing, and the trip needs 0.75 corrections per 10 bills instead of 1.25. A prompt holding one group's history starts every new group empty (60.0% in the trip's first week).
+**Memory that follows people.** When Ana, Ben, Clara and Dan start the trip after a month in the flat, the habits they taught about themselves come with them: the trip's first week is right 70.0% of the time, against 50.0% for the same trip started from nothing, and the trip needs 0.75 corrections per 10 bills instead of 1.25. A prompt holding one group's history starts every new group empty (50.0% in the trip's first week).
 
 <details><summary>Every run so far</summary>
 
@@ -54,6 +54,7 @@ Even splits put **$3,008.34** in the wrong pocket over the month. Quits gets 90.
 | [20261106-091520-mercury-3-s20261107-heldout](eval/results/20261106-091520-mercury-3-s20261107-heldout.json) | 20261107 | new seed, code frozen | 87.5% · 1.25 | 87.5% · 1.33 |
 | [20261106-095146-mercury-3-s20261107-heldout-v3](eval/results/20261106-095146-mercury-3-s20261107-heldout-v3.json) | 20261107 | Quits rerun after two correction fixes found in the first seed | – | 89.2% · 1.17 |
 | [20261106-095651-mercury-3-s20261108-fresh](eval/results/20261106-095651-mercury-3-s20261108-fresh.json) | 20261108 | third seed, all systems | 90.8% · 0.92 | 90.0% · 1.00 |
+| [20261106-122631-mercury-3-s20261108-fresh-cents](eval/results/20261106-122631-mercury-3-s20261108-fresh-cents.json) | 20261108 | same seed, after shares moved to whole cents | 90.0% · 1.00 | 90.0% · 1.00 |
 
 The first seed (20261106) is where the rule language was shaped, so it is not a fair test; it also holds the two controls (the same LLM with no history, and Quits with memory switched off):
 
