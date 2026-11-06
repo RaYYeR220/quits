@@ -188,6 +188,49 @@ function ConnectAgent() {
   );
 }
 
+function ConnectTelegram() {
+  const [busy, setBusy] = useState(false);
+  const [link, setLink] = useState<{ url: string; bot: string } | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function create() {
+    setBusy(true);
+    setError(null);
+    try {
+      setLink(await api<{ url: string; bot: string }>('/api/me/telegram', { body: {} }));
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div>
+      <p className="text-[14px] leading-[1.55] text-ink-2">
+        Log bills from your group chat: add the bot, send <span className="mono">/link &lt;group code&gt;</span>, then start a bill with +. Same memory as here.
+      </p>
+      {!link ? (
+        <button type="button" className="btn btn-ghost mt-4" onClick={() => void create()} disabled={busy}>
+          {busy ? 'Creating…' : 'Link my Telegram'}
+        </button>
+      ) : (
+        <div className="rise mt-4 flex flex-wrap items-center gap-3" aria-live="polite">
+          <a className="btn btn-mem" href={link.url} target="_blank" rel="noreferrer">
+            Open @{link.bot}
+          </a>
+          <span className="meta">The link works once.</span>
+        </div>
+      )}
+      {error ? (
+        <div className="mt-3">
+          <ErrorBlock message={error} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function MeView() {
   const { me, state, tabKey, refresh } = useSession();
   const ex = useExplorer();
@@ -260,6 +303,13 @@ export function MeView() {
             Connect an agent
           </h2>
           <ConnectAgent />
+        </section>
+
+        <section aria-labelledby="tg-h" className="sheet p-5 sm:p-6">
+          <h2 id="tg-h" className="h-sec mb-2">
+            Telegram
+          </h2>
+          <ConnectTelegram />
         </section>
       </div>
     </div>
