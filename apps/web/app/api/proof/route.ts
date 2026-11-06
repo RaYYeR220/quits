@@ -35,7 +35,7 @@ export const GET = handle(async () => {
   // The panel covers the last day, so it shows how the integration behaves now.
   const recent = gt(tatumCalls.at, sql`now() - interval '24 hours'`);
   // "answered": a result, or a definite answer such as not found or a rejected transaction
-  const answeredSql = sql`(${tatumCalls.ok} or ${tatumCalls.code} in (${sql.join(DEFINITE_CODES.map((c) => sql`${c}`), sql`, `)}))`;
+  const answeredSql = sql`(${tatumCalls.ok} or coalesce(${tatumCalls.code}, '') in (${sql.join(DEFINITE_CODES.map((c) => sql`${c}`), sql`, `)}))`;
   const [calls, byMethod, failures, stored, storedCount, settled] = await Promise.all([
     db.select().from(tatumCalls).orderBy(desc(tatumCalls.at)).limit(40),
     db
