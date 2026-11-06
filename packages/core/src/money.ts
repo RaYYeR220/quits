@@ -14,14 +14,18 @@ export function sumMicro(values: Iterable<Micro>): Micro {
   return s;
 }
 
+/** One cent of USDC. Bills are kept in whole cents so the shares people see add up. */
+export const CENT: Micro = 10_000n;
+
+/** Exact shares are carried at this many sub-units per micro-USDC before the one final rounding. */
+export const EXACT_SCALE = 1_000_000_000_000n;
+
 /**
- * Splits `total` across members in proportion to `weights`.
- * Floors every share, then hands the leftover units one at a time to the
- * largest fractional remainders (ties broken by member id, ascending), so the
- * shares always add up to `total` exactly.
+ * Exact (scaled by EXACT_SCALE) proportional parts of `amount` for `weights`,
+ * with no rounding yet. Add these up across a bill's lines, then `apportion` once.
  */
-export function allocate(total: Micro, weights: Record<string, number>): Record<string, Micro> {
-  if (total < 0n) throw new Error('allocate: total must be non-negative');
+export function exactParts(amount: Micro, weights: Record<string, number>): Record<string, bigint> {
+  if (amount < 0n) throw new Error('allocate: total must be non-negative');
   const ids = Object.keys(weights).sort();
   const scaled = ids.map((id) => {
     const w = weights[id] ?? 0;
@@ -30,27 +34,48 @@ export function allocate(total: Micro, weights: Record<string, number>): Record<
   });
   const weightSum = sumMicro(scaled);
   if (weightSum === 0n) throw new Error('allocate: all weights are zero');
+  return Object.fromEntries(ids.map((id, i) => [id, (amount * EXACT_SCALE * (scaled[i] ?? 0n)) / weightSum]));
+}
 
+/**
+ * Rounds exact shares to `total`, once: a total in whole cents becomes whole-cent
+ * shares, anything else whole micro-USDC. Every share is floored, then the leftover
+ * units go one at a time to the largest remainders (ties to the lowest id), so the
+ * shares add up to `total` exactly and none is more than one unit from exact.
+ * 4.47 between four is 1.12 + 1.12 + 1.12 + 1.11.
+ */
+export function apportion(total: Micro, exact: Record<string, bigint>): Record<string, Micro> {
+  if (total < 0n) throw new Error('allocate: total must be non-negative');
+  const unit = total > 0n && total % CENT === 0n ? CENT : 1n;
+  const per = EXACT_SCALE * unit;
+  const ids = Object.keys(exact).sort();
   const out: Record<string, Micro> = {};
   const remainders: { id: string; rem: bigint }[] = [];
   let given = 0n;
-  ids.forEach((id, i) => {
-    const num = total * (scaled[i] ?? 0n);
-    const share = num / weightSum;
-    out[id] = share;
-    given += share;
-    remainders.push({ id, rem: num % weightSum });
-  });
-
-  let left = total - given;
+  for (const id of ids) {
+    const x = exact[id] ?? 0n;
+    const q = x / per;
+    out[id] = q * unit;
+    given += q;
+    remainders.push({ id, rem: x % per });
+  }
+  let left = total / unit - given;
   remainders.sort((x, y) => (x.rem === y.rem ? (x.id < y.id ? -1 : 1) : x.rem > y.rem ? -1 : 1));
   for (const r of remainders) {
-    if (left === 0n) break;
-    if ((weights[r.id] ?? 0) === 0) continue;
-    out[r.id] = (out[r.id] ?? 0n) + 1n;
+    if (left <= 0n) break;
+    if ((exact[r.id] ?? 0n) === 0n) continue;
+    out[r.id] = (out[r.id] ?? 0n) + unit;
     left -= 1n;
   }
   return out;
+}
+
+/**
+ * Splits `total` across members in proportion to `weights`: exact parts, rounded
+ * once by `apportion`, so the shares always add up to `total` exactly.
+ */
+export function allocate(total: Micro, weights: Record<string, number>): Record<string, Micro> {
+  return apportion(total, exactParts(total, weights));
 }
 
 export function formatUsdc(m: Micro, decimals = 2): string {

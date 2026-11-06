@@ -1,4 +1,4 @@
-import { allocate, sumMicro, type Micro } from './money.ts';
+import { apportion, exactParts, sumMicro, type Micro } from './money.ts';
 import { supersede, type Rule } from './rules.ts';
 import type { Expense, MemberId, Tag } from './types.ts';
 
@@ -73,6 +73,7 @@ export function split(e: Expense, rules: readonly Rule[]): SplitResult {
   if (remainder > 0n || units.length === 0) units.push({ amount: remainder, tags: [], target: 'expense' });
 
   const shares: Record<MemberId, Micro> = Object.fromEntries(people.map((p) => [p, 0n]));
+  const exact: Record<MemberId, bigint> = {};
   const applied: Applied[] = [];
   let conflict = false;
 
@@ -127,10 +128,12 @@ export function split(e: Expense, rules: readonly Rule[]): SplitResult {
       }
     }
 
-    const part = allocate(unit.amount, weights);
-    for (const [m, v] of Object.entries(part)) shares[m] = (shares[m] ?? 0n) + v;
+    // carry each line's exact parts and round once at the end, so the shares add up to the bill in whole cents
+    for (const [m, v] of Object.entries(exactParts(unit.amount, weights))) exact[m] = (exact[m] ?? 0n) + v;
     for (const r of used) applied.push({ ruleId: r.id, target: unit.target });
   }
 
+  const total = Object.values(exact).length ? sumMicro(units.map((u) => u.amount)) : 0n;
+  Object.assign(shares, apportion(total, exact));
   return { shares, applied, conflict };
 }

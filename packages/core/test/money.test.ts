@@ -2,10 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { allocate, formatUsdc, parseUsdc, sumMicro } from '../src/money.ts';
 
 describe('allocate', () => {
-  it('splits evenly with the remainder going to the lowest ids', () => {
+  it('splits a whole-cent total in whole cents, the extra cent to the lowest id', () => {
     const r = allocate(10_000_000n, { a: 1, b: 1, c: 1 });
-    expect(r).toEqual({ a: 3_333_334n, b: 3_333_333n, c: 3_333_333n });
+    expect(r).toEqual({ a: 3_340_000n, b: 3_330_000n, c: 3_330_000n });
     expect(sumMicro(Object.values(r))).toBe(10_000_000n);
+  });
+
+  it('never shows four shares of 1.11 for a 4.47 bill', () => {
+    const r = allocate(4_470_000n, { ana: 1, ben: 1, clara: 1, dan: 1 });
+    expect(Object.values(r).sort()).toEqual([1_110_000n, 1_120_000n, 1_120_000n, 1_120_000n].sort());
+    expect(sumMicro(Object.values(r))).toBe(4_470_000n);
+  });
+
+  it('keeps micro-USDC precision for a total that is not whole cents', () => {
+    const r = allocate(10_000_001n, { a: 1, b: 1, c: 1 });
+    expect(r).toEqual({ a: 3_333_334n, b: 3_333_334n, c: 3_333_333n });
+    expect(sumMicro(Object.values(r))).toBe(10_000_001n);
   });
 
   it('respects weights exactly when they divide', () => {

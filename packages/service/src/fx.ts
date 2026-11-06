@@ -1,4 +1,4 @@
-import { MICRO_PER_USDC, type Micro } from '@quits/core';
+import { CENT, MICRO_PER_USDC, type Micro } from '@quits/core';
 
 export function minorDigits(currency: string): number {
   return new Intl.NumberFormat('en', { style: 'currency', currency }).resolvedOptions().maximumFractionDigits ?? 2;
@@ -15,12 +15,12 @@ function scaledRate(rate: string): bigint {
   return v;
 }
 
-/** amountMinor of `currency` → micro-USDC, given how many USDC one unit is worth. Rounds half up. */
+/** amountMinor of `currency` → micro-USDC in whole cents, given how many USDC one unit is worth. Rounds half up. */
 export function toUsdcMicro(amountMinor: bigint, currency: string, usdcPerFiat: string): Micro {
   const digits = BigInt(minorDigits(currency));
   const num = amountMinor * MICRO_PER_USDC * scaledRate(usdcPerFiat);
-  const den = 10n ** digits * RATE_SCALE;
-  return (num * 2n + den) / (den * 2n);
+  const den = 10n ** digits * RATE_SCALE * CENT;
+  return ((num * 2n + den) / (den * 2n)) * CENT;
 }
 
 /** Currencies priced 1:1 without a lookup. */

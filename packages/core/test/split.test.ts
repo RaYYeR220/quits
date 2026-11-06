@@ -35,6 +35,17 @@ function total(shares: Record<string, bigint>) {
 }
 
 describe('split', () => {
+  it('rounds once, so a bill with a line item still adds up in whole cents', () => {
+    const r = split(
+      expense({ usdc: '24.00', payerId: 'ana', items: [{ label: 'beer', usdcMicro: u('8.00'), tags: ['alcohol'] }] }),
+      [rule({ kind: 'exclude', member: 'ana', when: { tags: ['alcohol'] } })],
+    );
+    expect(total(r.shares)).toBe(u('24.00'));
+    for (const v of Object.values(r.shares)) expect(v % 10_000n).toBe(0n);
+    expect(r.shares.ana).toBe(u('4.00'));
+    expect([r.shares.ben, r.shares.clara, r.shares.dan].sort()).toEqual([u('6.66'), u('6.67'), u('6.67')].sort());
+  });
+
   it('splits equally without rules', () => {
     const r = split(expense({ usdc: '84.00' }), []);
     expect(r.shares).toEqual({ ana: u('21'), ben: u('21'), clara: u('21'), dan: u('21') });
