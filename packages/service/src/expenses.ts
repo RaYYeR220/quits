@@ -64,7 +64,7 @@ async function price(ctx: Ctx, d: ExpenseDraft): Promise<{ usdcMicro: Micro; ite
   if (PEGGED.has(d.currency)) fx = { rate: '1', source: 'peg', at: ctx.now().toISOString() };
   else {
     try {
-      fx = await ctx.fx.fiatPerUsdc(d.currency);
+      fx = await ctx.fx.usdcPerFiat(d.currency);
     } catch {
       return { fxUnavailable: d.currency };
     }

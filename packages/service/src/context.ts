@@ -5,8 +5,8 @@ import type { MemoryStore } from '@quits/memory';
 
 /** Converts a fiat currency to USDC. Throws when it can't price the currency. */
 export interface FxPort {
-  /** How many units of `fiat` one USDC buys (e.g. "0.8621" for EUR). */
-  fiatPerUsdc(fiat: string): Promise<{ rate: string; source: string; at: string }>;
+  /** How many USDC one unit of `fiat` is worth (e.g. "1.16" for EUR). */
+  usdcPerFiat(fiat: string): Promise<{ rate: string; source: string; at: string }>;
 }
 
 export interface Ports {

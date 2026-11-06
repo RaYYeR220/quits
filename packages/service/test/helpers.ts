@@ -16,8 +16,8 @@ export function scriptedLlm() {
 }
 
 export const fx: FxPort = {
-  async fiatPerUsdc(code) {
-    const rates: Record<string, string> = { EUR: '0.8', PLN: '4' };
+  async usdcPerFiat(code) {
+    const rates: Record<string, string> = { EUR: '1.25', PLN: '0.25' };
     const rate = rates[code];
     if (!rate) throw new Error(`no rate for ${code}`);
     return { rate, source: 'tatum', at: '2026-11-06T10:00:00Z' };

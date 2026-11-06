@@ -15,11 +15,11 @@ function scaledRate(rate: string): bigint {
   return v;
 }
 
-/** amountMinor of `currency` → micro-USDC, given how many units of the currency one USDC buys. Rounds half up. */
-export function toUsdcMicro(amountMinor: bigint, currency: string, fiatPerUsdc: string): Micro {
+/** amountMinor of `currency` → micro-USDC, given how many USDC one unit is worth. Rounds half up. */
+export function toUsdcMicro(amountMinor: bigint, currency: string, usdcPerFiat: string): Micro {
   const digits = BigInt(minorDigits(currency));
-  const num = amountMinor * MICRO_PER_USDC * RATE_SCALE;
-  const den = 10n ** digits * scaledRate(fiatPerUsdc);
+  const num = amountMinor * MICRO_PER_USDC * scaledRate(usdcPerFiat);
+  const den = 10n ** digits * RATE_SCALE;
   return (num * 2n + den) / (den * 2n);
 }
 
