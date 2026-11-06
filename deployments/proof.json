@@ -3,7 +3,9 @@
     "owner": "0xbc02b930206de470ed100fcd4d6ae25535647baef950a8dee68bafc73103db8d",
     "agentId": "951edfde65ae7bd307148bd7e7ed5beed9bfc960958ae7fb7f0e153982cf2505"
   },
-  "walletPayments": [],
+  "walletPayments": [
+    "5eWczSwa9vxiLsfvWy1p4fcm2girFRQ3EdWKGEHN6hJ2"
+  ],
   "agentPayments": [
     "4ax2Bq9CFiu9Wyu4CS3sMdGZUMdhJoxjWvZq2ntryw8j"
   ],
@@ -15,6 +17,10 @@
     {
       "mandate": "0x42ee50b05c1c6840d6c488efaf7d50d5f45557a117ce388e728e88b334cee9ec",
       "allowance": "0xe003e0aefcb001a2bb775f0d18813fb6e5414a339270d874d07de4af35ef87ed"
+    },
+    {
+      "mandate": "0xd6e38d9de9a0c685898cf1e0e3296286784bd292316c605a65b391c14398b9ef",
+      "allowance": "0xd7346c442b00a3e9b2dcf3444f3507f1a38985aefb4edab5dadd17cc778c0472"
     }
   ],
   "notes": {
