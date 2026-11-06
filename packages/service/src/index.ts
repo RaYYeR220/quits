@@ -8,6 +8,7 @@ import * as lr from './learned.ts';
 import * as dbt from './debts.ts';
 import * as au from './autosettle.ts';
 import { drainMemoryQueue, flushMemory } from './memoryQueue.ts';
+import * as demo from './demo.ts';
 
 export type { Ports, FxPort } from './context.ts';
 export { QuitsError } from './context.ts';
@@ -17,6 +18,7 @@ export type { DebtRow, PaidMethod } from './debts.ts';
 export type { Decision } from './autosettle.ts';
 export { limitFrom, STARTING_LIMIT } from './autosettle.ts';
 export { toUsdcMicro, minorDigits } from './fx.ts';
+export { DEMO_MEMBERS, DEMO_FLAT, DEMO_TRIP } from './demo.ts';
 
 type Rest<F> = F extends (ctx: Ctx, ...rest: infer R) => unknown ? R : never;
 
@@ -77,6 +79,9 @@ export function createQuits(ports: Ports) {
     autoSettleDecision: (...a: Rest<typeof au.autoSettleDecision>) => au.autoSettleDecision(ctx, ...a),
     decide: (...a: Rest<typeof au.decide>) => au.decide(ctx, ...a),
     activeMandate: (...a: Rest<typeof au.activeMandate>) => au.activeMandate(ctx, ...a),
+
+    // demo
+    seedDemo: (...a: Rest<typeof demo.seedDemo>) => demo.seedDemo(ctx, ...a),
   };
 }
 
