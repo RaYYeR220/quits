@@ -53,7 +53,8 @@ async function every(name: string, ms: number, fn: () => Promise<unknown>) {
 }
 
 const bucket = createBucket({ perMin: 55, perHour: 480 });
-const jobs: Promise<unknown>[] = [every('memory', 5_000, () => q.drainMemory({ bucket }))];
+// With the in-process stand-in the web app drains its own memory; the worker only writes to Walrus.
+const jobs: Promise<unknown>[] = memory.kind === 'walrus' ? [every('memory', 5_000, () => q.drainMemory({ bucket }))] : [];
 
 const pkg = env('QUITS_PACKAGE_ID');
 const configId = env('QUITS_CONFIG_ID');

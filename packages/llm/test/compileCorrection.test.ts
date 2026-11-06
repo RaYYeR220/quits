@@ -50,7 +50,7 @@ describe('compileCorrection', () => {
       rule: { kind: 'weights', weights: [{ member: 'ana', weight: 40 }, { member: 'ben', weight: 20 }, { member: 'clara', weight: 20 }, { member: 'dan', weight: 20 }], when: { category: ['rent'] } },
     };
     const r = await compileCorrection(fakeLlm([out]), 'rent goes by room size 40/20/20/20', ctx);
-    expect(r.ok && r.scope).toBe('group');
+    expect(r.ok && 'rule' in r && r.scope).toBe('group');
   });
 
   it('asks back when the correction is ambiguous', async () => {
@@ -73,7 +73,17 @@ describe('compileCorrection', () => {
       rule: { kind: 'exclude', member: 'ana', when: { tags: ['alcohol'] }, revoked: true },
     };
     const r = await compileCorrection(fakeLlm([out]), 'Ana drinks now', ctx);
-    expect(r.ok && r.rule.revoked).toBe(true);
+    expect(r.ok && 'rule' in r && r.rule.revoked).toBe(true);
+  });
+
+  it('treats a one-off fact as a fix to this expense, not a rule', async () => {
+    const r = await compileCorrection(fakeLlm([{ status: 'once', once: { absent: ['dan'] } }]), 'Dan wasn’t there', ctx);
+    expect(r).toEqual({ ok: true, once: { absent: ['dan'] } });
+  });
+
+  it('asks back about an unknown person in a one-off fix', async () => {
+    const r = await compileCorrection(fakeLlm([{ status: 'once', once: { absent: ['zoe'] } }]), 'Zoe wasn’t there', ctx);
+    expect(r.ok).toBe(false);
   });
 
   it('rejects a rule the engine cannot run', async () => {
@@ -92,10 +102,20 @@ describe.skipIf(!process.env.LIVE_LLM)('compileCorrection (live model)', () => {
     });
     const r = await compileCorrection(llm, 'Ana doesn’t drink, leave her out of the wine', ctx);
     expect(r.ok).toBe(true);
-    if (!r.ok) return;
+    if (!r.ok || !('rule' in r)) throw new Error('expected a rule');
     expect(r.rule.kind).toBe('exclude');
     expect(r.rule.kind === 'exclude' && r.rule.member).toBe('ana');
     expect(r.rule.when.tags).toContain('alcohol');
     expect(r.scope).toBe('member');
+  }, 60_000);
+
+  it('does not turn a one-off absence into a rule', async () => {
+    const llm = createLlm({
+      apiKey: process.env.LLM_API_KEY ?? '',
+      baseUrl: process.env.LLM_BASE_URL ?? 'https://api.venice.ai/api/v1',
+      model: process.env.LLM_MODEL ?? 'gemini-3-8-flash',
+    });
+    const r = await compileCorrection(llm, 'Dan was not there tonight, leave him out', ctx);
+    expect(r).toEqual({ ok: true, once: { absent: ['dan'] } });
   }, 60_000);
 });

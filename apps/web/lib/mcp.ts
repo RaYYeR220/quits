@@ -66,7 +66,10 @@ export function buildMcp(q: Quits, userId: string, origin: string): McpServer {
     async ({ draftId, text }) => {
       const r = await q.correct(draftId, userId, text);
       if (!r.ok) return textResult({ question: r.clarify });
-      return textResult({ learned: r.learned.sentence, scope: r.learned.scope, ...(await describe(q, r.proposal.expense.groupId, r.proposal)) });
+      return textResult({
+        ...(r.learned ? { learned: r.learned.sentence, scope: r.learned.scope } : { fixedThisExpenseOnly: r.fixed }),
+        ...(await describe(q, r.proposal.expense.groupId, r.proposal)),
+      });
     },
   );
 

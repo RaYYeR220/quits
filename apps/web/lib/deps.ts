@@ -53,17 +53,35 @@ export function memoryStore(): MemoryStore {
   return key && accountId ? createWalrusStore({ key, accountId, ...(env('MEMWAL_SERVER_URL') ? { serverUrl: env('MEMWAL_SERVER_URL') } : {}) }) : createMockStore();
 }
 
+/** Local development without a Tatum key: `QUITS_FX_FIXED=PLN:0.25,EUR:1.16`. Recorded as source `fixed-dev`. */
+function fixedRates() {
+  const spec = env('QUITS_FX_FIXED');
+  if (!spec || env('TATUM_API_KEY')) return null;
+  const rates = Object.fromEntries(spec.split(',').map((p) => p.split(':').map((x) => x.trim()) as [string, string]));
+  return {
+    async usdcPerFiat(fiat: string) {
+      const rate = rates[fiat.toUpperCase()];
+      if (!rate) throw new Error(`no fixed rate for ${fiat}`);
+      return { rate, source: 'fixed-dev', at: new Date().toISOString() };
+    },
+  };
+}
+
 let quitsP: Promise<Quits> | null = null;
 export function getQuits(): Promise<Quits> {
   quitsP ??= (async () => {
     const db = await getDb();
     const data = createTatumData({ apiKey: env('TATUM_API_KEY') ?? '', log: dbCallLog() });
-    return createQuits({
+    const memory = memoryStore();
+    const q = createQuits({
       db,
-      memory: memoryStore(),
+      memory,
       llm: createLlm({ apiKey: env('LLM_API_KEY') ?? '', baseUrl: env('LLM_BASE_URL') ?? 'https://api.venice.ai/api/v1', model: env('LLM_MODEL') ?? 'mercury-3' }),
-      fx: { usdcPerFiat: (fiat) => data.usdcPerFiat(fiat) },
+      fx: fixedRates() ?? { usdcPerFiat: (fiat) => data.usdcPerFiat(fiat) },
     });
+    // The in-process memory stand-in lives in this process only, so it is drained here.
+    if (memory.kind === 'mock') setInterval(() => void q.drainMemory().catch(() => {}), 1_000).unref();
+    return q;
   })();
   return quitsP;
 }

@@ -6,6 +6,7 @@ const config: NextConfig = {
   serverExternalPackages: ['@grpc/grpc-js', '@electric-sql/pglite', 'postgres'],
   outputFileTracingRoot: fileURLToPath(new URL('../..', import.meta.url)),
   typedRoutes: false,
+  agentRules: false,
 };
 
 export default config;

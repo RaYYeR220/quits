@@ -94,8 +94,17 @@ export async function loadRules(
     for (const row of indexed) {
       const rule = parseBody(row.r.body);
       if (!rule || info.has(rule.id) || !keep(rule)) continue;
-      if (row.mState === 'done') continue; // stored but not read back: Walrus is the source of truth
-      info.set(rule.id, { rule, sentence: row.r.sentence, scope: row.r.scope, state: 'saving', ...(row.r.userId ? { ownerId: row.r.userId } : {}) });
+      // Written but not read back this time (relayer index lag, expiry): apply from the
+      // local index and say so on the rule, rather than dropping it silently.
+      const state: RuleState = row.mState === 'done' ? 'cached' : 'saving';
+      info.set(rule.id, {
+        rule,
+        sentence: row.r.sentence,
+        scope: row.r.scope,
+        state,
+        ...(state === 'cached' && row.blobId ? { blobId: row.blobId } : {}),
+        ...(row.r.userId ? { ownerId: row.r.userId } : {}),
+      });
     }
   } catch {
     degraded = 'cached';

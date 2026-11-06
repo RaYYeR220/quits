@@ -129,7 +129,8 @@ export function createTelegramBot(token: string, q: Quits, webUrl: string): Bot 
         awaitingCorrection.set(key, pending);
         return void (await ctx.reply(r.clarify, { reply_markup: { force_reply: true, selective: true } }));
       }
-      await ctx.reply(`Got it — “${r.learned.sentence}”\n\n${await render(q, r.proposal)}`, { parse_mode: 'Markdown', reply_markup: keyboard(r.proposal.draftId) });
+      const head = r.learned ? `Got it, I’ll remember: “${r.learned.sentence}”` : 'Fixed for this one.';
+      await ctx.reply(`${head}\n\n${await render(q, r.proposal)}`, { parse_mode: 'Markdown', reply_markup: keyboard(r.proposal.draftId) });
       return;
     }
     const isGroupChat = ctx.chat.type !== 'private';

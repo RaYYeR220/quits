@@ -3,16 +3,26 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc -b packages/core packages/llm packages/memory packages/chain packages/pay packages/db packages/service apps/worker eval",
     "move:test": "sui move test --path move/quits",
     "eval": "tsx eval/src/run.ts",
-    "verify:onchain": "tsx scripts/verify-onchain.ts"
+    "verify:onchain": "tsx scripts/verify-onchain.ts",
+    "eval:render": "tsx scripts/render-results.ts"
   },
   "devDependencies": {
+    "@mysten/sui": "^2.39.0",
+    "@quits/chain": "workspace:^",
+    "@quits/core": "workspace:^",
+    "@quits/db": "workspace:^",
+    "@quits/memory": "workspace:^",
+    "@quits/pay": "workspace:^",
+    "@quits/service": "workspace:^",
     "@types/node": "^24.0.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",

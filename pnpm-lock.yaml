@@ -8,6 +8,27 @@ importers:
 
   .:
     devDependencies:
+      '@mysten/sui':
+        specifier: ^2.39.0
+        version: 2.39.0(typescript@5.9.3)
+      '@quits/chain':
+        specifier: workspace:^
+        version: link:packages/chain
+      '@quits/core':
+        specifier: workspace:^
+        version: link:packages/core
+      '@quits/db':
+        specifier: workspace:^
+        version: link:packages/db
+      '@quits/memory':
+        specifier: workspace:^
+        version: link:packages/memory
+      '@quits/pay':
+        specifier: workspace:^
+        version: link:packages/pay
+      '@quits/service':
+        specifier: workspace:^
+        version: link:packages/service
       '@types/node':
         specifier: ^24.0.0
         version: 24.19.2

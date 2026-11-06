@@ -21,7 +21,7 @@ describe('the learning loop', () => {
     const fixed = await q.correct(first.proposal.draftId, 'ana', 'I don’t drink');
     expect(fixed.ok).toBe(true);
     if (!fixed.ok) return;
-    expect(fixed.learned.scope).toBe('member');
+    expect(fixed.learned?.scope).toBe('member');
     expect(fixed.proposal.shares.ana).toBe(u('18.75'));
     expect(fixed.proposal.why[0]?.state).toBe('saving');
     await q.accept(first.proposal.draftId, 'clara');
@@ -143,5 +143,25 @@ describe('the learning loop', () => {
     expect(b.ok && b.proposal.degraded).toBe('cached');
     expect(b.ok && b.proposal.shares.ana).toBe(u('18.75'));
     expect(b.ok && b.proposal.why[0]?.state).toBe('cached');
+  });
+});
+
+describe('when Walrus does not return a stored rule', () => {
+  it('still applies it from the index and marks it cached', async () => {
+    const inner = createMockStore();
+    let forget = false;
+    const memory: MemoryStore = { ...inner, kind: inner.kind, recall: async (...a) => (forget ? [] : inner.recall(...a)) };
+    const { q, llm, groupId } = await setup({ memory });
+    llm.push(dinnerParse, anaNoAlcohol);
+    const a = await q.addExpenseFromText(groupId, 'clara', 'x');
+    if (!a.ok) throw new Error('parse');
+    await q.correct(a.proposal.draftId, 'ana', 'I don’t drink');
+    await q.flushMemory();
+    forget = true;
+    llm.push(dinnerParse);
+    const b = await q.addExpenseFromText(groupId, 'clara', 'y');
+    expect(b.ok && b.proposal.shares.ana).toBe(u('18.75'));
+    expect(b.ok && b.proposal.why[0]?.state).toBe('cached');
+    expect(b.ok && b.proposal.why[0]?.blobId).toBeTruthy();
   });
 });

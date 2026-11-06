@@ -237,7 +237,7 @@ export async function accept(ctx: Ctx, draftId: string, actorId: string): Promis
 }
 
 export type CorrectResult =
-  | { ok: true; proposal: Proposal; learned: { ruleId: string; sentence: string; scope: 'group' | 'member' } }
+  | { ok: true; proposal: Proposal; learned: { ruleId: string; sentence: string; scope: 'group' | 'member' } | null; fixed?: { absent: string[]; payer?: string } }
   | { ok: false; clarify: string };
 
 /** A member corrects a draft in plain words; Quits learns a rule and re-proposes right away. */
@@ -257,6 +257,18 @@ export async function correct(ctx: Ctx, draftId: string, actorId: string, text: 
   if (!c.ok) {
     await ctx.db.insert(corrections).values({ id: correctionId, expenseId: draftId, userId: actorId, text, clarify: c.clarify });
     return { ok: false, clarify: c.clarify };
+  }
+  if ('once' in c) {
+    // A fact about this expense only: fix it, learn nothing.
+    const participants = e.participants.filter((p) => !c.once.absent.includes(p));
+    if (participants.length === 0) return { ok: false, clarify: 'Then who shared this expense?' };
+    const payerId = c.once.payer ?? e.payerId;
+    await ctx.db.update(expenses).set({ participants, payerId }).where(eq(expenses.id, draftId));
+    await ctx.db.insert(corrections).values({ id: correctionId, expenseId: draftId, userId: actorId, text });
+    const fixedExpense = { ...e, participants, payerId };
+    const p = await propose(ctx, fixedExpense);
+    await saveShares(ctx, draftId, p.shares, p.applied);
+    return { ok: true, proposal: { ...p, draftId, fx: r.fxRate ? { rate: r.fxRate, source: r.fxSource ?? '' } : null }, learned: null, fixed: c.once };
   }
   // Sandbox groups keep what they learn to themselves instead of writing to members' portable memory.
   const scope = opts.keepInGroup ? 'group' : c.scope;
