@@ -1,0 +1,1 @@
+ALTER TABLE "tatum_calls" ADD COLUMN "code" text;

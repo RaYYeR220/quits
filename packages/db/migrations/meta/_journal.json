@@ -22,6 +22,13 @@
       "when": 1793953300188,
       "tag": "0002_live_debt_pair",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793960784664,
+      "tag": "0003_call_codes",
+      "breakpoints": true
     }
   ]
 }

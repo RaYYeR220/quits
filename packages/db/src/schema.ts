@@ -185,6 +185,8 @@ export const tatumCalls = pgTable(
     method: text('method').notNull(),
     ms: integer('ms').notNull(),
     ok: boolean('ok').notNull(),
+    /** gRPC status or HTTP status when the call did not succeed. */
+    code: text('code'),
     at: created(),
   },
   (t) => [index('tatum_calls_at_idx').on(t.at)],

@@ -7,6 +7,16 @@ import { useExplorer } from './session.tsx';
 import type { DebtStatus, ProofData } from './types.ts';
 import { ErrorBlock, ExtLink, LoadingBlock, Money } from './ui.tsx';
 
+const FAILURE: Record<string, string> = {
+  RESOURCE_EXHAUSTED: 'rate limited',
+  '429': 'rate limited',
+  UNAVAILABLE: 'unavailable',
+  DEADLINE_EXCEEDED: 'timed out',
+  INTERNAL: 'gateway error',
+  UNKNOWN: 'unknown error',
+  unknown: 'before error codes were logged',
+};
+
 const SURFACE: Record<string, string> = { grpc: 'Sui gRPC', graphql: 'Sui GraphQL', data: 'Data API' };
 const SETTLED: Partial<Record<DebtStatus, string>> = { settled_wallet: 'wallet', settled_agent: 'agent', settled_external: 'direct' };
 
@@ -106,8 +116,14 @@ export function ProofView() {
             <h2 id="tatum-h" className="h-sec">
               Live Tatum calls
             </h2>
-            <span className="meta">{calls ? `${Math.round((ok / calls) * 100)}% ok overall` : 'none yet'}</span>
+            <span className="meta">{calls ? `${Math.round((ok / calls) * 100)}% answered · last ${data.tatum.windowHours ?? 24} h` : 'none yet'}</span>
           </div>
+          <p className="meta mt-2 max-w-[44em]">
+            Answered: Tatum returned a result or a definite answer, such as &ldquo;not found yet&rdquo; while a transaction lands, or a simulation the chain rejects.
+            {data.tatum.failures?.length
+              ? ` Failed: ${data.tatum.failures.map((f) => `${f.n} × ${FAILURE[f.code] ?? f.code}`).join(', ')}.`
+              : ' Nothing failed.'}
+          </p>
           {data.tatum.byMethod.length === 0 ? (
             <p className="mt-4 text-[14px] text-ink-2">No calls recorded yet. Pay a debt or turn on auto-settle in the demo and they show up here.</p>
           ) : (
@@ -121,7 +137,7 @@ export function ProofView() {
                       Calls
                     </th>
                     <th scope="col" className="num">
-                      OK
+                      Answered
                     </th>
                     <th scope="col" className="num">
                       Avg

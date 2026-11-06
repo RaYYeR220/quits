@@ -1,7 +1,7 @@
-import { desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, isNotNull, sql } from 'drizzle-orm';
 import { debts, memories, tatumCalls } from '@quits/db';
 import { blobUrl } from '@quits/memory';
-import { listMemoryReceipts, type MemoryReceipt } from '@quits/chain';
+import { DEFINITE_CODES, listMemoryReceipts, type MemoryReceipt } from '@quits/chain';
 import { chainConfig, getQuits, getSuiGraphql, memoryStore, network } from '@/lib/deps.ts';
 import { explorerTx } from '@/lib/paydebt.ts';
 import { handle } from '@/lib/route.ts';
@@ -32,12 +32,23 @@ async function onchainReceipts() {
 export const GET = handle(async () => {
   const q = await getQuits();
   const db = q.ctx.db;
-  const [calls, byMethod, stored, storedCount, settled] = await Promise.all([
+  // The panel covers the last day, so it shows how the integration behaves now.
+  const recent = gt(tatumCalls.at, sql`now() - interval '24 hours'`);
+  // "answered": a result, or a definite answer such as not found or a rejected transaction
+  const answeredSql = sql`(${tatumCalls.ok} or ${tatumCalls.code} in (${sql.join(DEFINITE_CODES.map((c) => sql`${c}`), sql`, `)}))`;
+  const [calls, byMethod, failures, stored, storedCount, settled] = await Promise.all([
     db.select().from(tatumCalls).orderBy(desc(tatumCalls.at)).limit(40),
     db
-      .select({ surface: tatumCalls.surface, method: tatumCalls.method, n: sql<number>`count(*)::int`, okN: sql<number>`sum(case when ${tatumCalls.ok} then 1 else 0 end)::int`, avgMs: sql<number>`avg(${tatumCalls.ms})::int` })
+      .select({ surface: tatumCalls.surface, method: tatumCalls.method, n: sql<number>`count(*)::int`, okN: sql<number>`sum(case when ${answeredSql} then 1 else 0 end)::int`, avgMs: sql<number>`avg(${tatumCalls.ms})::int` })
       .from(tatumCalls)
+      .where(recent)
       .groupBy(tatumCalls.surface, tatumCalls.method)
+      .orderBy(desc(sql`count(*)`)),
+    db
+      .select({ code: sql<string>`coalesce(${tatumCalls.code}, 'unknown')`, n: sql<number>`count(*)::int` })
+      .from(tatumCalls)
+      .where(and(recent, sql`not (${answeredSql})`))
+      .groupBy(sql`1`)
       .orderBy(desc(sql`count(*)`)),
     db.select({ ns: memories.ns, kind: memories.kind, blobId: memories.blobId, storedAt: memories.storedAt, text: memories.text }).from(memories).where(eq(memories.state, 'done')).orderBy(desc(memories.storedAt)).limit(30),
     db.select({ n: sql<number>`count(*)::int` }).from(memories).where(eq(memories.state, 'done')),
@@ -53,7 +64,7 @@ export const GET = handle(async () => {
     network,
     memoryBackend: memoryStore().kind,
     package: pkg,
-    tatum: { recent: calls, byMethod },
+    tatum: { recent: calls, byMethod, failures, windowHours: 24 },
     onchainMemory: await onchainReceipts(),
     memories: {
       stored: storedCount[0]?.n ?? 0,

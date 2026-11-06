@@ -176,6 +176,8 @@ export interface ProofData {
   tatum: {
     recent: { id: number; surface: string; method: string; ms: number; ok: boolean; at: string }[];
     byMethod: { surface: string; method: string; n: number; okN: number; avgMs: number }[];
+    failures?: { code: string; n: number }[];
+    windowHours?: number;
   };
   /** Walrus Blob objects the memory account owns, read from chain through Tatum (mainnet only). */
   onchainMemory?:

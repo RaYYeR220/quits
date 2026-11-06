@@ -52,7 +52,7 @@ function dbCallLog(): CallLog {
   return {
     record(c) {
       void getDb()
-        .then((db) => db.insert(tatumCalls).values({ surface: c.surface, method: c.method.slice(0, 120), ms: Math.round(c.ms), ok: c.ok }))
+        .then((db) => db.insert(tatumCalls).values({ surface: c.surface, method: c.method.slice(0, 120), ms: Math.round(c.ms), ok: c.ok, code: c.code ?? null }))
         .catch(() => {});
     },
   };
