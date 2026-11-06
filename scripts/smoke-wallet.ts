@@ -100,6 +100,12 @@ const wrongKey = await blake.key.signPersonalMessage(new TextEncoder().encode(fr
 const forged = await mallory.call('POST', '/api/auth/verify', { address: avery.address, signature: wrongKey.signature, message: fresh.data.message });
 step("signing in as someone else's address is refused", forged.status === 401 && /did not verify/.test(forged.data.error), forged.data);
 
+const visitor = new Member('Visitor');
+await visitor.call('POST', '/api/demo/session', { as: 'ana' });
+const demoCode = (await visitor.call('GET', '/api/me')).data.groups?.find((x: any) => x.isDemo)?.code;
+const intrude = await avery.call('POST', '/api/groups/join', { code: demoCode });
+step('a real wallet cannot join a demo group (its wallets are server-held)', Boolean(demoCode) && intrude.status === 403, intrude.data);
+
 const g = await avery.call('POST', '/api/groups', { name: 'Wallet check', currency: 'USDC' });
 step('creditor opens a group', g.status === 200 && Boolean(g.data.id), g.data);
 const groupId = g.data.id as string;

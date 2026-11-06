@@ -72,6 +72,8 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
       const name = methodName(method);
       let t0 = 0;
       // A 429 means the gateway turned the request away before running it, so retrying is safe.
+      // A reset connection (UNAVAILABLE) is retried twice: reads are idempotent, and re-sending the same
+      // signed transaction can only execute it once.
       const attempt = async (): Promise<UnaryCall<I, O>> => {
         for (let i = 0; ; i++) {
           if (limiter) await limiter.take();
@@ -81,7 +83,8 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
             await c.response;
             return c;
           } catch (err) {
-            if (i >= 5 || !isRateLimited(err)) throw err;
+            const retry = isRateLimited(err) ? i < 5 : isConnectionReset(err) ? i < 2 : false;
+            if (!retry) throw err;
             await new Promise((r) => setTimeout(r, 700 * (i + 1)));
           }
         }
@@ -139,6 +142,12 @@ function errorCode(err: unknown): string | undefined {
 function quiet<T>(p: Promise<T>): Promise<T> {
   p.catch(() => {});
   return p;
+}
+
+function isConnectionReset(err: unknown): boolean {
+  const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : '';
+  const msg = err instanceof Error ? err.message : String(err);
+  return code === 'UNAVAILABLE' || /ECONNRESET|socket hang up|connection reset/i.test(msg);
 }
 
 function isRateLimited(err: unknown): boolean {

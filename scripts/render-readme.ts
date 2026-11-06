@@ -32,7 +32,9 @@ const main = mergeRuns([load(v1), load(v2)]) as unknown as Run;
 const heldoutFile = byLabel('heldout');
 const heldoutV3File = byLabel('heldout-v3');
 const v3File = byLabel('v3');
-const freshFile = byLabel('fresh');
+const freshFirstFile = byLabel('fresh');
+// the same seed again after splitting moved to whole cents; when present it is the headline
+const freshFile = byLabel('fresh-cents') ?? freshFirstFile;
 const heldout = heldoutFile ? (load(heldoutFile) as Run) : null;
 const heldoutV3 = heldout && heldoutV3File ? (mergeRuns([load(heldoutFile!), load(heldoutV3File)]) as unknown as Run) : null;
 const fresh = freshFile ? (load(freshFile) as Run) : null;
@@ -121,7 +123,8 @@ const history: { file: string | undefined; what: string; run: Run | null }[] = [
   { file: v2, what: 'Quits rerun after adding the "whoever bought it pays" rule kind', run: load(v2) as Run },
   { file: heldoutFile, what: 'new seed, code frozen', run: heldout },
   { file: heldoutV3File, what: 'Quits rerun after two correction fixes found in the first seed', run: heldoutV3File ? (load(heldoutV3File) as Run) : null },
-  { file: freshFile, what: 'third seed, all systems', run: fresh },
+  { file: freshFirstFile, what: 'third seed, all systems', run: freshFirstFile ? (load(freshFirstFile) as Run) : null },
+  { file: freshFile !== freshFirstFile ? freshFile : undefined, what: 'same seed, after shares moved to whole cents', run: freshFile !== freshFirstFile ? fresh : null },
 ];
 const rows = history
   .filter((h) => h.file && h.run)
