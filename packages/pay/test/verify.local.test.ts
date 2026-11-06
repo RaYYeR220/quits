@@ -77,6 +77,21 @@ describe.skipIf(!process.env.LOCALNET)('x402 exact settlement on localnet', () =
     expect((await totalBalance(q.client, ben)) - before).toBe(debt.usdcMicro);
   });
 
+  it('refuses a signed transfer that already ran on chain, even for a fresh debt', async () => {
+    const paid = newDebt(12_000_000n);
+    const header = await buildWalletPayment(q.ana, requirementsFor(paid), { client: q.client });
+    const payment = paymentFromHeaders({ 'PAYMENT-SIGNATURE': header })!;
+    const first = await verifyAndSettle(q.client, payment, expectationFor(paid), { store: createMemorySettlementStore() });
+    expect(first).toMatchObject({ ok: true });
+    await q.client.core.waitForTransaction({ digest: (first as { digest: string }).digest });
+
+    // same debtor, creditor and amount, a store that has never seen the digest: the public signed bytes are replayed
+    const twin = newDebt(12_000_000n);
+    const replay = await verifyAndSettle(q.client, payment, expectationFor(twin), { store: createMemorySettlementStore() });
+    expect(replay).toMatchObject({ ok: false });
+    expect((replay as { reason: string }).reason).toMatch(/digest_reused|simulate_failed/);
+  });
+
   it('agent_allowance_payment_settles', async () => {
     const debt = newDebt(40_000_000n);
     const { mandateId, allowanceId } = await openLocalMandate(q, q.ana, { creditors: [ben], maxPerDebt: 1_000_000_000n });

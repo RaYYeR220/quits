@@ -23,6 +23,8 @@ export interface PaymentExpectation {
   agent: string;
   quitsPkg: string;
   coinType: string;
+  /** The debt's creation time; a transfer checkpointed earlier can't have paid it. */
+  notBeforeMs?: number;
 }
 
 export type SettleFailure =
@@ -119,6 +121,13 @@ export async function verifyAndSettle(
     return (await priorSettlement(store, digest, expect.debtId)) ?? refuse('in_progress', 'this debt is being settled right now');
   }
 
+  // A signed transaction is public once it runs. Only one that has never run can pay this debt.
+  const ran = await alreadyExecuted(client, digest);
+  if (ran !== false) {
+    await store.release(digest, expect.debtId);
+    return ran === true ? refuse('digest_reused', 'this transaction already ran on chain', digest) : refuse('simulate_failed', `could not check the transaction: ${ran}`);
+  }
+
   let executed: SuiClientTypes.TransactionResult<{ balanceChanges: true; events: true }>;
   try {
     executed = await client.core.executeTransaction({
@@ -141,6 +150,18 @@ export async function verifyAndSettle(
   }
   await store.confirm(digest, expect.debtId);
   return { ok: true, digest: executed.Transaction.digest, payer: sender, via };
+}
+
+/** true if the digest is already on chain, false if not found, or the lookup error. */
+async function alreadyExecuted(client: ClientWithCoreApi, digest: string): Promise<boolean | string> {
+  try {
+    await client.core.getTransaction({ digest });
+    return true;
+  } catch (err) {
+    const msg = errorMessage(err);
+    const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : '';
+    return code === 'NOT_FOUND' || /not.?found|could not find|does not exist/i.test(msg) ? false : msg;
+  }
 }
 
 /** The earlier settlement of this debt or digest, if there was one. */

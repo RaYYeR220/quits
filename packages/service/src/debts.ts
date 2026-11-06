@@ -72,7 +72,7 @@ export type PaidMethod = 'wallet' | 'agent' | 'external';
  * with the same digest returns the existing row; a digest already used for a
  * different debt is refused.
  */
-export async function markPaid(ctx: Ctx, debtId: string, p: { method: PaidMethod; digest: string }): Promise<{ debt: DebtRow; already: boolean }> {
+export async function markPaid(ctx: Ctx, debtId: string, p: { method: PaidMethod; digest: string; amount?: bigint }): Promise<{ debt: DebtRow; already: boolean }> {
   const d = await getDebt(ctx, debtId);
   if ((SETTLED as readonly string[]).includes(d.status)) {
     if (d.txDigest && d.txDigest !== p.digest) throw new QuitsError('conflict', 'debt already settled by another transaction');
@@ -83,7 +83,11 @@ export async function markPaid(ctx: Ctx, debtId: string, p: { method: PaidMethod
   if (clash) throw new QuitsError('conflict', 'transaction already used for another debt');
 
   const status = p.method === 'wallet' ? 'settled_wallet' : p.method === 'agent' ? 'settled_agent' : 'settled_external';
-  await ctx.db.update(debts).set({ status, txDigest: p.digest, settledAt: ctx.now() }).where(eq(debts.id, debtId));
+  // If a new bill changed this debt while the transfer was in flight, keep the amount that was actually paid;
+  // the next refresh opens a debt for whatever is still owed.
+  const paid = p.amount ?? d.usdcMicro;
+  await ctx.db.update(debts).set({ status, txDigest: p.digest, settledAt: ctx.now(), usdcMicro: paid }).where(eq(debts.id, debtId));
+  d.usdcMicro = paid;
   const members = await groupMembers(ctx, d.groupId);
   const name = (id: string) => members.find((m) => m.id === id)?.name ?? id;
   const how = p.method === 'agent' ? 'through their auto-settle mandate' : p.method === 'external' ? 'directly (matched on-chain)' : 'from their wallet';

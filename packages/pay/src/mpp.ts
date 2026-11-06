@@ -101,6 +101,10 @@ export async function verifyMppPayment(
   }
   if (tx.$kind === 'FailedTransaction') return refuse('execute_failed', 'payment transaction failed on-chain', digest);
 
+  const at = tx.Transaction.timestampMs;
+  if (expect.notBeforeMs !== undefined && at !== null && at !== undefined && at < expect.notBeforeMs) {
+    return refuse('digest_reused', 'that transfer happened before this debt existed', digest);
+  }
   const sender = normalizeSuiAddress(tx.Transaction.transaction.sender ?? '');
   if (sender !== normalizeSuiAddress(expect.debtor)) return refuse('bad_sender', `paid by ${sender}, not the debtor`, digest);
   const effects = checkEffects(tx.Transaction, expect, 'wallet');

@@ -6,9 +6,11 @@ import { handle } from '@/lib/route.ts';
 export const runtime = 'nodejs';
 
 /** A one-time message for the wallet (or zkLogin account) to sign. */
-export const POST = handle(async () => {
+export const POST = handle(async (req: Request) => {
   const nonce = randomBytes(16).toString('hex');
   const q = await getQuits();
   await q.ctx.db.insert(authNonces).values({ nonce, expiresAt: new Date(Date.now() + 5 * 60_000) });
-  return { nonce, message: `Sign in to Quits\nNonce: ${nonce}\nIssued: ${new Date().toISOString()}` };
+  // the site is part of what the wallet signs, so a signature collected elsewhere can't sign in here
+  const site = new URL(req.url).host;
+  return { nonce, message: `Sign in to Quits\nSite: ${site}\nNonce: ${nonce}\nIssued: ${new Date().toISOString()}` };
 });

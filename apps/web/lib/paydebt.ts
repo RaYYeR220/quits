@@ -57,6 +57,7 @@ export async function payDebt(q: Quits, req: Request, debtId: string): Promise<R
     agent: agentAddress(),
     quitsPkg: cfg.pkg,
     coinType: cfg.usdcType,
+    notBeforeMs: d.createdAt.getTime(),
   };
   const store = await settlementStore();
   const client = getSui().client;
@@ -77,6 +78,8 @@ export async function payDebt(q: Quits, req: Request, debtId: string): Promise<R
   }
 
   if (!result.ok && result.reason === 'already_settled' && result.digest) {
+    // the money moved earlier but the debt row may not have caught up (a crash between the two writes)
+    if (!settled(d)) await q.markPaid(d.id, { method: 'wallet', digest: result.digest, amount: d.usdcMicro }).catch(() => {});
     return json({ settled: true, debtId, digest: result.digest, explorer: explorerTx(result.digest) }, { headers: settlementHeaders({ digest: result.digest }, net) });
   }
   if (!result.ok) {
@@ -84,7 +87,7 @@ export async function payDebt(q: Quits, req: Request, debtId: string): Promise<R
     return ask(`${result.reason}${result.detail ? `: ${result.detail}` : ''}`);
   }
 
-  const marked = await q.markPaid(d.id, { method: result.via === 'agent' ? 'agent' : 'wallet', digest: result.digest });
+  const marked = await q.markPaid(d.id, { method: result.via === 'agent' ? 'agent' : 'wallet', digest: result.digest, amount: expect.amount });
   const headers = { ...settlementHeaders({ digest: result.digest, payer: result.payer }, net), ...(mpp ? mppReceiptHeaders({ digest: result.digest }) : {}) };
   return json({ settled: true, debtId, digest: result.digest, via: result.via, explorer: explorerTx(result.digest), status: marked.debt.status }, { headers });
 }

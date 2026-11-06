@@ -9,13 +9,13 @@ export const runtime = 'nodejs';
 type P = { params: Promise<{ id: string }> };
 
 function terms(b: Record<string, unknown>): Terms {
-  const usdc = (v: unknown, fallback: bigint) => (typeof v === 'string' && /^\d+$/.test(v) ? BigInt(v) : fallback);
+  const usdc = (v: unknown, fallback: bigint) => (typeof v === 'string' && /^\d{1,12}$/.test(v) ? BigInt(v) : fallback);
   const t: Terms = {
     lifetimeCap: usdc(b.lifetimeCap, 50_000_000n),
     weeklyLimit: usdc(b.weeklyLimit, 20_000_000n),
     maxPerDebt: usdc(b.maxPerDebt, 20_000_000n),
-    objectionWindowMs: typeof b.objectionWindowMs === 'number' ? Math.max(60_000, Math.min(b.objectionWindowMs, 7 * 86_400_000)) : 12 * 3_600_000,
-    days: typeof b.days === 'number' ? Math.max(1, Math.min(b.days, 90)) : 30,
+    objectionWindowMs: typeof b.objectionWindowMs === 'number' && Number.isFinite(b.objectionWindowMs) ? Math.floor(Math.max(60_000, Math.min(b.objectionWindowMs, 7 * 86_400_000))) : 12 * 3_600_000,
+    days: typeof b.days === 'number' && Number.isFinite(b.days) ? Math.floor(Math.max(1, Math.min(b.days, 90))) : 30,
   };
   if (t.maxPerDebt > t.weeklyLimit || t.weeklyLimit > t.lifetimeCap) throw new HttpError(400, 'Limits must satisfy per-debt ≤ weekly ≤ lifetime.');
   return t;

@@ -24,6 +24,9 @@ export const POST = handle(async (req: Request, { params }: P) => {
   const q = await getQuits();
   const d = await q.debt(debtId);
   if (d.debtorId !== s.uid) throw new HttpError(403, 'You can only pay your own debts.');
+  // server-held money only ever moves between the four demo wallets
+  if (!DEMO_MEMBERS.some((m) => m.id === d.creditorId)) throw new HttpError(403, 'Demo wallets only pay other demo flatmates.');
+  if (d.status !== 'open' && d.status !== 'recorded') throw new HttpError(409, 'This debt is already settled or was replaced.');
   if (d.usdcMicro > DEMO_CAP) throw new HttpError(400, 'Demo wallets settle debts up to 1 USDC. Try the Coffee tab.');
   const signer = demoSigner(s.uid);
   if (!signer) throw new HttpError(503, 'Demo wallets are not configured.');
@@ -58,8 +61,9 @@ export const POST = handle(async (req: Request, { params }: P) => {
 
   const members = await q.members(d.groupId);
   const creditor = members.find((m) => m.id === d.creditorId)?.suiAddress;
+  if (!creditor) throw new HttpError(409, 'The creditor has no wallet yet.');
   const reqs = paymentRequired(
-    { id: d.id, debtor: signer.toSuiAddress(), creditor: creditor!, usdcMicro: d.usdcMicro },
+    { id: d.id, debtor: signer.toSuiAddress(), creditor, usdcMicro: d.usdcMicro },
     { resource: url, usdcType: chainConfig().usdcType, network: network === 'localnet' ? 'localnet' : 'mainnet' },
   ).body;
   const header = await buildWalletPayment(signer, reqs, { client });

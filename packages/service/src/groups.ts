@@ -60,6 +60,8 @@ export async function addMember(ctx: Ctx, groupId: string, userId: string, at?: 
 export async function joinByCode(ctx: Ctx, code: string, userId: string): Promise<string> {
   const [g] = await ctx.db.select().from(groups).where(eq(groups.code, code.toUpperCase())).limit(1);
   if (!g) throw new QuitsError('not_found', 'no group with that code');
+  // demo groups belong to the four demo flatmates; their wallets are server-held
+  if (g.isDemo) throw new QuitsError('forbidden', 'demo groups are only for the demo flatmates');
   await addMember(ctx, g.id, userId);
   return g.id;
 }

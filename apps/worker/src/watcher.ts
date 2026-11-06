@@ -49,7 +49,7 @@ export async function matchExternalPayment(q: Quits, tx: ObservedTx): Promise<{ 
           if (!open) continue;
           const [used] = await q.ctx.db.select({ id: debts.id }).from(debts).where(eq(debts.txDigest, tx.digest)).limit(1);
           if (used) return null;
-          await q.markPaid(open.id, { method: 'external', digest: tx.digest });
+          await q.markPaid(open.id, { method: 'external', digest: tx.digest, amount: to.amount });
           return { debtId: open.id };
         }
       }
