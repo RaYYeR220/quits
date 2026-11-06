@@ -241,7 +241,7 @@ export type CorrectResult =
   | { ok: false; clarify: string };
 
 /** A member corrects a draft in plain words; Quits learns a rule and re-proposes right away. */
-export async function correct(ctx: Ctx, draftId: string, actorId: string, text: string): Promise<CorrectResult> {
+export async function correct(ctx: Ctx, draftId: string, actorId: string, text: string, opts: { keepInGroup?: boolean } = {}): Promise<CorrectResult> {
   const r = await loadExpense(ctx, draftId);
   await assertMember(ctx, r.groupId, actorId);
   if (r.status !== 'draft') throw new QuitsError('conflict', 'only drafts can be corrected');
@@ -258,7 +258,9 @@ export async function correct(ctx: Ctx, draftId: string, actorId: string, text: 
     await ctx.db.insert(corrections).values({ id: correctionId, expenseId: draftId, userId: actorId, text, clarify: c.clarify });
     return { ok: false, clarify: c.clarify };
   }
-  await learnRule(ctx, { rule: c.rule, scope: c.scope, sentence: c.sentence, groupId: r.groupId, createdBy: actorId, sourceExpenseId: draftId });
+  // Sandbox groups keep what they learn to themselves instead of writing to members' portable memory.
+  const scope = opts.keepInGroup ? 'group' : c.scope;
+  await learnRule(ctx, { rule: c.rule, scope, sentence: c.sentence, groupId: r.groupId, createdBy: actorId, sourceExpenseId: draftId });
   await ctx.db.insert(corrections).values({ id: correctionId, expenseId: draftId, userId: actorId, text, ruleId: c.rule.id });
   await enqueueMemory(ctx, {
     ns: nsGroupLog(r.groupId),
@@ -274,7 +276,7 @@ export async function correct(ctx: Ctx, draftId: string, actorId: string, text: 
   return {
     ok: true,
     proposal: { ...p, draftId, fx: r.fxRate ? { rate: r.fxRate, source: r.fxSource ?? '' } : null },
-    learned: { ruleId: c.rule.id, sentence: c.sentence, scope: c.rule.kind === 'exclude' && c.scope === 'member' ? 'member' : 'group' },
+    learned: { ruleId: c.rule.id, sentence: c.sentence, scope: c.rule.kind === 'exclude' && scope === 'member' ? 'member' : 'group' },
   };
 }
 

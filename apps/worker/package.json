@@ -10,13 +10,15 @@
     "start": "tsx src/main.ts"
   },
   "dependencies": {
-    "@quits/service": "workspace:*",
-    "@quits/core": "workspace:*",
-    "@quits/memory": "workspace:*",
-    "@quits/chain": "workspace:*",
-    "@quits/pay": "workspace:*",
-    "@quits/db": "workspace:*",
     "@mysten/sui": "^2.39.0",
+    "@quits/chain": "workspace:*",
+    "@quits/core": "workspace:*",
+    "@quits/db": "workspace:*",
+    "@quits/llm": "workspace:^",
+    "@quits/memory": "workspace:*",
+    "@quits/pay": "workspace:*",
+    "@quits/service": "workspace:*",
+    "drizzle-orm": "^0.44.0",
     "grammy": "^1.38.0"
   }
 }

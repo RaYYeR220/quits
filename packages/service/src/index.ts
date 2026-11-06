@@ -18,7 +18,7 @@ export type { DebtRow, PaidMethod } from './debts.ts';
 export type { Decision } from './autosettle.ts';
 export { limitFrom, STARTING_LIMIT } from './autosettle.ts';
 export { toUsdcMicro, minorDigits } from './fx.ts';
-export { DEMO_MEMBERS, DEMO_FLAT, DEMO_TRIP } from './demo.ts';
+export { DEMO_MEMBERS, DEMO_FLAT, DEMO_TRIP, SANDBOX_PREFIX } from './demo.ts';
 
 type Rest<F> = F extends (ctx: Ctx, ...rest: infer R) => unknown ? R : never;
 
@@ -82,6 +82,7 @@ export function createQuits(ports: Ports) {
 
     // demo
     seedDemo: (...a: Rest<typeof demo.seedDemo>) => demo.seedDemo(ctx, ...a),
+    createSandbox: (...a: Rest<typeof demo.createSandbox>) => demo.createSandbox(ctx, ...a),
   };
 }
 

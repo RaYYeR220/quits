@@ -212,3 +212,11 @@ export const telegramUsers = pgTable('telegram_users', {
   telegramUserId: text('telegram_user_id').primaryKey(),
   userId: text('user_id').notNull().references(() => users.id),
 });
+
+/** One row per payment being settled: the digest ↔ debt reservation behind x402 idempotency. */
+export const paymentClaims = pgTable('payment_claims', {
+  digest: text('digest').primaryKey(),
+  debtId: text('debt_id').notNull().unique(),
+  settled: boolean('settled').notNull().default(false),
+  createdAt: created(),
+});

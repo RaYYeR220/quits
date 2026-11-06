@@ -140,3 +140,27 @@ export async function seedDemo(ctx: Ctx, addresses: Partial<Record<'ANA' | 'BEN'
   await play(ctx, DEMO_TRIP, 'EUR', TRIP, [A, B, C]);
   return { created: true };
 }
+
+/** Prefix of per-visitor sandbox tabs. */
+export const SANDBOX_PREFIX = 'demo-tab-';
+
+const SANDBOX: Step[] = [
+  { at: '', payer: B, text: 'Morning coffees', category: 'drinks', amount: '7.20' },
+  { at: '', payer: C, text: 'Friday beers and fries', category: 'drinks', amount: '9.60', items: [{ label: 'beers', amount: '6.40', tags: ['alcohol'] }] },
+];
+
+/**
+ * A small, fresh tab for one demo visitor: the four flatmates, two small
+ * expenses, debts of a few USDC that can be settled for real on mainnet.
+ * The members' portable rules (Ana's, Clara's) apply here by themselves.
+ */
+export async function createSandbox(ctx: Ctx, key: string): Promise<string> {
+  const id = `${SANDBOX_PREFIX}${key}`;
+  const [exists] = await ctx.db.select({ id: groups.id }).from(groups).where(eq(groups.id, id)).limit(1);
+  if (exists) return id;
+  await createGroup(ctx, { id, name: 'Coffee tab', defaultCurrency: 'USD', ownerId: A, isDemo: true });
+  for (const m of [B, C, D]) await addMember(ctx, id, m);
+  const now = ctx.now().getTime();
+  await play(ctx, id, 'USD', SANDBOX.map((s, i) => ({ ...s, at: new Date(now - (2 - i) * 3_600_000).toISOString() })), [A, B, C, D]);
+  return id;
+}

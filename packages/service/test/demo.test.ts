@@ -30,3 +30,20 @@ describe('demo seed', () => {
     expect(debts.length).toBeGreaterThan(0);
   });
 });
+
+describe('sandbox tab', () => {
+  it('gives each visitor small payable debts with portable rules applied', async () => {
+    let n = 0;
+    const q = createQuits({ db: await memoryDb(), memory: createMockStore(), llm: scriptedLlm().llm, fx, ids: () => `x${(n += 1)}` });
+    await q.seedDemo();
+    await q.flushMemory();
+    const id = await q.createSandbox('abc');
+    expect(await q.createSandbox('abc')).toBe(id);
+    const ex = await q.expenses(id);
+    const beers = ex.find((e) => e.expense.description === 'Friday beers and fries')!;
+    // Ana doesn't drink: 6.40 of beers split by Ben, Clara, Dan; fries 3.20 split by four
+    expect(beers.shares['demo-ana']).toBe(800_000n);
+    const debts = await q.refreshDebts(id);
+    expect(debts.every((d) => d.usdcMicro < 10_000_000n)).toBe(true);
+  });
+});
