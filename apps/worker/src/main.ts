@@ -79,7 +79,9 @@ if (pkg && configId && webUrl && operatorKey && agentKey) {
   jobs.push(every('autosettle', 15_000, () => autoSettleOnce(deps)));
 } else log('autosettle off: chain config incomplete');
 
-jobs.push(
+// Tatum bills every message a checkpoint stream delivers, and the free plan's credits are one-time, so the
+// watcher for direct transfers is opt-in. Payments made through Quits (x402, MPP, the agent) don't need it.
+if (env('QUITS_CHECKPOINT_STREAM') === 'on') jobs.push(
   followCheckpoints({
     client: sui.client,
     usdcType,
@@ -97,7 +99,8 @@ jobs.push(
 );
 
 const demoKeys = ['ANA', 'BEN', 'CLARA', 'DAN'].map((m) => env(`QUITS_DEMO_${m}_KEY`)).filter((k): k is string => Boolean(k));
-if (demoKeys.length === 4 && network === 'mainnet') {
+// Demo payments top up the paying wallet from the pool when it's short, so periodic rebalancing is opt-in too.
+if (demoKeys.length === 4 && network === 'mainnet' && env('QUITS_DEMO_REBALANCE') === 'on') {
   const wallets = demoKeys.map((k) => Ed25519Keypair.fromSecretKey(k));
   jobs.push(every('demo wallets', 300_000, () => rebalanceDemoWallets(sui.client, wallets, usdcType).then((r) => ({ ...r, moved: Number(r.moved) }))));
 }

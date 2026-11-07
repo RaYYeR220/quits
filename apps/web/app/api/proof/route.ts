@@ -16,7 +16,8 @@ async function onchainReceipts() {
   const owner = process.env.MEMWAL_OWNER_ADDRESS?.trim();
   const agentId = process.env.MEMWAL_AGENT_ID?.trim();
   if (!owner || !agentId || network === 'localnet') return null;
-  if (receiptsCache && Date.now() - receiptsCache.at < 60_000) return receiptsCache.value;
+  // on-chain receipts change only when a memory lands; ten minutes keeps a page left open from spending gateway credits
+  if (receiptsCache && Date.now() - receiptsCache.at < 600_000) return receiptsCache.value;
   let value: NonNullable<typeof receiptsCache>['value'];
   try {
     const list = await listMemoryReceipts(getSuiGraphql(), owner, { agentId, namespacePrefix: 'quits:' });
