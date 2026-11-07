@@ -18,6 +18,16 @@ export const TATUM_GRPC_HOST: Record<Exclude<SuiNetwork, 'localnet'>, string> = 
   testnet: 'sui-testnet-grpc.gateway.tatum.io:443',
 };
 
+/** Mysten's public fullnodes, used only when the gateway refuses for credits. */
+export const PUBLIC_GRPC_HOST: Record<Exclude<SuiNetwork, 'localnet'>, string> = {
+  mainnet: 'fullnode.mainnet.sui.io:443',
+  testnet: 'fullnode.testnet.sui.io:443',
+};
+export const PUBLIC_GRAPHQL_URL: Record<Exclude<SuiNetwork, 'localnet'>, string> = {
+  mainnet: 'https://graphql.mainnet.sui.io/graphql',
+  testnet: 'https://graphql.testnet.sui.io/graphql',
+};
+
 export const TATUM_GRAPHQL_URL: Record<Exclude<SuiNetwork, 'localnet'>, string> = {
   mainnet: 'https://sui-mainnet.gateway.tatum.io/graphql',
   testnet: 'https://sui-testnet.gateway.tatum.io/graphql',

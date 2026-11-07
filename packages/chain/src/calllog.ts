@@ -1,4 +1,5 @@
-export type CallSurface = 'grpc' | 'graphql' | 'data';
+/** `fallback`: the public Sui fullnode answered because the gateway refused for credits. */
+export type CallSurface = 'grpc' | 'graphql' | 'data' | 'fallback';
 
 export interface CallRecord {
   surface: CallSurface;

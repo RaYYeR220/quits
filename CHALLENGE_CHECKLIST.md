@@ -12,8 +12,8 @@
 ## Judging criteria
 | Criterion | What to look at |
 | --- | --- |
-| Walrus and Tatum integration (30%) | Rules are read back from Walrus at every decision and cited by blob (`packages/service/src/learned.ts`); rebuild-from-Walrus; member-owned memory; on-chain memory receipts. Tatum: gRPC for every read, simulate and execute; filtered checkpoint stream; GraphQL; exchange-rate API for every non-USD bill; the contract was published through Tatum |
-| Technical quality, Tatum Sui RPC (30%) | Native gRPC transport (the default gRPC-web transport fails against the gateway), rate-limit budget with safe 429 retry, typed errors; 23 Move tests, 179 TypeScript tests (162 offline + 17 against localnet or live services), plus `scripts/smoke-wallet.ts` (21 checks on mainnet with fresh wallets); `pnpm verify:onchain` |
+| Walrus and Tatum integration (30%) | Rules are read back from Walrus at every decision and cited by blob (`packages/service/src/learned.ts`); rebuild-from-Walrus; member-owned memory; on-chain memory receipts. Tatum: gRPC for every read, simulate and execute; filtered checkpoint stream (opt-in: the gateway bills every streamed message); GraphQL; exchange-rate API for every non-USD bill; the contract was published through Tatum |
+| Technical quality, Tatum Sui RPC (30%) | Native gRPC transport (the default gRPC-web transport fails against the gateway), rate-limit budget with safe 429 retry, typed errors; 23 Move tests, 182 TypeScript tests (165 offline + 17 against localnet or live services), plus `scripts/smoke-wallet.ts` (21 checks on mainnet with fresh wallets); `pnpm verify:onchain` |
 | Creativity (20%) | Memory as the group's unwritten rules; one-off facts vs habits; a member's memory follows them to the next group; an agent that pays only what the chain lets it |
 | Presentation (20%) | README, [JUDGES.md](JUDGES.md), live demo without sign-in, `/proof`, video |
 

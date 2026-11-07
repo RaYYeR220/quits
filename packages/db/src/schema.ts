@@ -181,7 +181,7 @@ export const tatumCalls = pgTable(
   'tatum_calls',
   {
     id: serial('id').primaryKey(),
-    surface: text('surface', { enum: ['grpc', 'graphql', 'data'] }).notNull(),
+    surface: text('surface', { enum: ['grpc', 'graphql', 'data', 'fallback'] }).notNull(),
     method: text('method').notNull(),
     ms: integer('ms').notNull(),
     ok: boolean('ok').notNull(),

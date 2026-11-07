@@ -9,6 +9,7 @@ import { ErrorBlock, ExtLink, LoadingBlock, Money } from './ui.tsx';
 
 const FAILURE: Record<string, string> = {
   RESOURCE_EXHAUSTED: 'rate limited',
+  OUT_OF_CREDITS: 'refused: plan credits used up',
   '429': 'rate limited',
   UNAVAILABLE: 'unavailable',
   DEADLINE_EXCEEDED: 'timed out',
@@ -17,7 +18,7 @@ const FAILURE: Record<string, string> = {
   unknown: 'before error codes were logged',
 };
 
-const SURFACE: Record<string, string> = { grpc: 'Sui gRPC', graphql: 'Sui GraphQL', data: 'Data API' };
+const SURFACE: Record<string, string> = { grpc: 'Sui gRPC', graphql: 'Sui GraphQL', data: 'Data API', fallback: 'Public fullnode' };
 const SETTLED: Partial<Record<DebtStatus, string>> = { settled_wallet: 'wallet', settled_agent: 'agent', settled_external: 'direct' };
 
 const clip = (s: string, n = 18) => (s.length > n ? `${s.slice(0, n)}…` : s);
@@ -124,6 +125,11 @@ export function ProofView() {
               ? ` Failed: ${data.tatum.failures.map((f) => `${f.n} × ${FAILURE[f.code] ?? f.code}`).join(', ')}.`
               : ' Nothing failed.'}
           </p>
+          {data.tatum.byMethod.some((m) => m.surface === 'fallback') ? (
+            <p className="notice notice-warn mt-3 text-[13px]">
+              Tatum refused some calls because this app&rsquo;s free plan credits ran out; those went to the public Sui fullnode instead and are listed as &ldquo;Public fullnode&rdquo;.
+            </p>
+          ) : null}
           {data.tatum.byMethod.length === 0 ? (
             <p className="mt-4 text-[14px] text-ink-2">No calls recorded yet. Pay a debt or turn on auto-settle in the demo and they show up here.</p>
           ) : (

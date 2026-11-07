@@ -12,7 +12,7 @@ import {
 } from '@protobuf-ts/runtime-rpc';
 import type { SuiGraphQLClient } from '@mysten/sui/graphql';
 import { elapsedSince, noopCallLog, recordCall, type CallLog } from './calllog.ts';
-import { LOCALNET_RPC_URL, TATUM_GRPC_HOST, type SuiNetwork } from './config.ts';
+import { LOCALNET_RPC_URL, PUBLIC_GRPC_HOST, TATUM_GRPC_HOST, type SuiNetwork } from './config.ts';
 import { sharedLimiter, type Limiter } from './limiter.ts';
 import { createTatumGraphQL } from './tatum-graphql.ts';
 
@@ -20,7 +20,12 @@ export interface MeterOptions {
   log: CallLog;
   /** `null` disables throttling (localnet, tests). */
   limiter: Limiter | null;
+  /** Answers instead of the gateway for a while after it refuses for credits (see `isOutOfCredits`). */
+  fallback?: RpcTransport;
 }
+
+/** How long to stay on the fallback after the gateway refuses for credits, before trying it again. */
+const FALLBACK_MS = 10 * 60_000;
 
 export interface TatumSuiOptions {
   apiKey?: string;
@@ -57,24 +62,38 @@ export function createTatumSui({ apiKey, network, log = noopCallLog, limiter, rp
           meta: apiKey ? { 'x-api-key': apiKey } : {},
         });
 
+  const fallback =
+    network === 'localnet' ? undefined : new GrpcTransport({ host: PUBLIC_GRPC_HOST[network], channelCredentials: ChannelCredentials.createSsl() });
+
   return {
-    client: new SuiGrpcClient({ network, transport: meteredTransport(inner, meter) }),
+    client: new SuiGrpcClient({ network, transport: meteredTransport(inner, { ...meter, ...(fallback ? { fallback } : {}) }) }),
     graphql: createTatumGraphQL({ apiKey, network, url: graphqlUrl, ...meter }),
   };
 }
 
 /** Wraps a transport so every call waits for the limiter and lands in the call log. */
-export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOptions): RpcTransport {
+export function meteredTransport(inner: RpcTransport, { log, limiter, fallback }: MeterOptions): RpcTransport {
+  let fallbackUntil = 0;
   return {
     mergeOptions: (options) => inner.mergeOptions(options),
 
     unary<I extends object, O extends object>(method: MethodInfo<I, O>, input: I, options: RpcOptions): UnaryCall<I, O> {
       const name = methodName(method);
       let t0 = 0;
+      let surface: 'grpc' | 'fallback' = 'grpc';
       // A 429 means the gateway turned the request away before running it, so retrying is safe.
       // A reset connection (UNAVAILABLE) is retried twice: reads are idempotent, and re-sending the same
       // signed transaction can only execute it once.
+      const viaFallback = async (fb: RpcTransport): Promise<UnaryCall<I, O>> => {
+        surface = 'fallback';
+        t0 = performance.now();
+        const c = fb.unary(method, input, options);
+        await c.response;
+        return c;
+      };
       const attempt = async (): Promise<UnaryCall<I, O>> => {
+        // Out of credits: the public fullnode answers until the window passes, and the call log says so.
+        if (fallback && Date.now() < fallbackUntil) return viaFallback(fallback);
         for (let i = 0; ; i++) {
           if (limiter) await limiter.take();
           t0 = performance.now();
@@ -83,6 +102,11 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
             await c.response;
             return c;
           } catch (err) {
+            if (fallback && isOutOfCredits(err)) {
+              recordCall(log, { surface: 'grpc', method: name, ms: elapsedSince(t0), ok: false, code: 'OUT_OF_CREDITS' });
+              fallbackUntil = Date.now() + FALLBACK_MS;
+              return viaFallback(fallback);
+            }
             const retry = isRateLimited(err) ? i < 5 : isConnectionReset(err) ? i < 2 : false;
             if (!retry) throw err;
             await new Promise((r) => setTimeout(r, 700 * (i + 1)));
@@ -92,8 +116,8 @@ export function meteredTransport(inner: RpcTransport, { log, limiter }: MeterOpt
       const call = attempt();
       const response = call.then((c) => c.response);
       response.then(
-        () => recordCall(log, { surface: 'grpc', method: name, ms: elapsedSince(t0), ok: true }),
-        (err: unknown) => recordCall(log, { surface: 'grpc', method: name, ms: t0 ? elapsedSince(t0) : 0, ok: false, code: errorCode(err) }),
+        () => recordCall(log, { surface, method: name, ms: elapsedSince(t0), ok: true }),
+        (err: unknown) => recordCall(log, { surface, method: name, ms: t0 ? elapsedSince(t0) : 0, ok: false, code: errorCode(err) }),
       );
       return new UnaryCall(
         method,
@@ -142,6 +166,13 @@ function errorCode(err: unknown): string | undefined {
 function quiet<T>(p: Promise<T>): Promise<T> {
   p.catch(() => {});
   return p;
+}
+
+/** The gateway refused because the plan's credits ran out (not a rate limit, not a node error). */
+export function isOutOfCredits(err: unknown): boolean {
+  const code = err && typeof err === 'object' && 'code' in err ? String((err as { code: unknown }).code) : '';
+  const msg = err instanceof Error ? err.message : String(err);
+  return code === 'PERMISSION_DENIED' || code === 'UNAUTHENTICATED' || /\b40[23]\b|credits?\b|quota|upgrade your plan|payment required|forbidden/i.test(msg);
 }
 
 function isConnectionReset(err: unknown): boolean {

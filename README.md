@@ -99,7 +99,7 @@ flowchart LR
   Compile -- "remember" --> Walrus
   Debts -- "x402 / MPP" --> USDC
   Debts -- "agent pulls exact debt" --> Move --> Allow
-  Worker["Worker: Tatum checkpoint stream, memory writer, settlement agent"] --> Sui
+  Worker["Worker: memory writer, settlement agent, Telegram (optional checkpoint watcher)"] --> Sui
   Worker --> Walrus
 ```
 
@@ -109,7 +109,7 @@ Everything in the diagram runs in production today.
 
 **Walrus Memory is where the product's knowledge lives.** At every decision Quits reads the group's rules and each participant's portable memory back from Walrus (`recall`), applies the rules it finds, and cites the memory blob behind each one. The local database only indexes them: wipe it and "Rebuild from Walrus" restores the same behaviour (and refuses to touch the index if Walrus returns fewer rules than it holds). Each memory is a Walrus `Blob` object owned by the memory account's wallet and tagged with the delegate key that wrote it; `/proof` and `pnpm verify:onchain` list them from chain. A member can point their portable memory at their own Walrus Memory account, so it lands in their wallet and they can revoke Quits. Namespaces: `quits:g:<group>:rules`, `quits:g:<group>:log`, `quits:m:<member>`.
 
-**Tatum is the chain gateway.** All Sui reads and writes go through Tatum: gRPC (native transport) for balances, objects, simulate-and-execute of every x402 payment, the settlement agent's transactions and a filtered `SubscribeCheckpoints` stream that matches direct USDC transfers to open debts; GraphQL for memory receipts; the exchange-rate API for every non-USD bill. `/proof` shows the live per-method call log.
+**Tatum is the chain gateway.** All Sui reads and writes go through Tatum: gRPC (native transport) for balances, objects, simulate-and-execute of every x402 payment and the settlement agent's transactions; GraphQL for memory receipts; the exchange-rate API for every non-USD bill. `/proof` shows the live per-method call log. The worker can also follow a filtered `SubscribeCheckpoints` stream that matches direct USDC transfers to open debts; it is off in the hosted demo (`QUITS_CHECKPOINT_STREAM=on` turns it on), because the gateway bills every streamed message and the free plan's credits are one-time. If the gateway ever refuses for credits, calls go to the public Sui fullnode for ten minutes and `/proof` lists them as "Public fullnode".
 
 <img src="docs/img/proof.jpg" alt="The public proof page: network sui:mainnet, memories stored on Walrus, Tatum calls per method with latency, and every settlement on Sui with its digest">
 

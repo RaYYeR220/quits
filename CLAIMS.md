@@ -12,8 +12,8 @@
 | Every split decision reads its rules back from Walrus Memory and cites the blob | VERIFIED-LIVE | any proposal's "why" chips; `packages/service/src/learned.ts` |
 | Over 10 Walrus Memory memories exist on mainnet, each a Blob object tagged with our delegate key | VERIFIED-LIVE | `pnpm verify:onchain` |
 | The rule index can be rebuilt from Walrus alone | REPRODUCIBLE | Rules page → Rebuild; `packages/service/test/learning.test.ts` |
-| All Sui reads and writes go through Tatum (gRPC, GraphQL) and bills are priced with Tatum's exchange-rate API | VERIFIED-LIVE | `/proof` call log; `packages/chain/src` |
-| Direct USDC transfers between members are matched to open debts from Tatum's checkpoint stream | REPRODUCIBLE | `apps/worker/test/watcher.test.ts`; worker log |
+| All Sui reads and writes go through Tatum (gRPC, GraphQL) and bills are priced with Tatum's exchange-rate API | VERIFIED-LIVE | `/proof` call log; `packages/chain/src`. If the gateway refuses for credits, calls fall back to the public fullnode and `/proof` lists them separately (`packages/chain/test/fallback.test.ts`) |
+| Direct USDC transfers between members are matched to open debts from Tatum's checkpoint stream | REPRODUCIBLE | `apps/worker/test/watcher.test.ts`; off in the hosted demo to save gateway credits (`QUITS_CHECKPOINT_STREAM=on`) |
 | On bills nothing in Quits was tuned on, Quits is right the first time as often as an LLM given the whole history (90.0% each, same number of corrections), misallocates slightly less money, and uses about 40× fewer model tokens and answers about 50× faster | MODELED | README → Does it actually learn? (rendered from `eval/results/*-fresh-cents.json`); `pnpm eval --seed=20261108` |
 | After its first week in a group, Quits got every benchmark bill right the first time | MODELED | same run, by-week table |
 | A member's own rules follow them into a new group: the trip's first week goes from 50% to 70% right | MODELED | same run, "Memory that follows people"; `--scenarios=trip-after-flat` |

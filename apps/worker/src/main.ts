@@ -18,7 +18,7 @@ const network = (env('SUI_NETWORK') ?? 'mainnet') as SuiNetwork;
 const usdcType = network === 'localnet' ? SUI_TYPE : USDC_MAINNET;
 const db = env('DATABASE_URL') ? await connectDb(env('DATABASE_URL')!, { migrate: true }) : await memoryDb();
 const callLog = {
-  record(c: { surface: 'grpc' | 'graphql' | 'data'; method: string; ms: number; ok: boolean; code?: string }) {
+  record(c: { surface: 'grpc' | 'graphql' | 'data' | 'fallback'; method: string; ms: number; ok: boolean; code?: string }) {
     void db.insert(tatumCalls).values({ surface: c.surface, method: c.method.slice(0, 120), ms: Math.round(c.ms), ok: c.ok, code: c.code ?? null }).catch(() => {});
   },
 };
