@@ -61,10 +61,17 @@ export async function listMemoryReceipts(
   let after: string | null = null;
   const max = opts.max ?? 200;
   for (let page = 0; page < 20 && out.length < max; page++) {
-    const res = (await graphql.query({ query: QUERY, variables: { owner, type: WALRUS_BLOB_TYPE, after } })) as {
+    type Page = {
       data?: { address?: { objects?: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; nodes: Node[] } } | null };
       errors?: { message: string }[];
     };
+    let res = (await graphql.query({ query: QUERY, variables: { owner, type: WALRUS_BLOB_TYPE, after } })) as Page;
+    // A cursor is pinned to the checkpoint of the node that served the first page; a node that hasn't
+    // reached it yet answers "in the future". Give the indexers a moment and ask again.
+    for (let retry = 0; retry < 3 && res.errors?.some((e) => /in the future/i.test(e.message)); retry++) {
+      await new Promise((r) => setTimeout(r, 1_000 * (retry + 1)));
+      res = (await graphql.query({ query: QUERY, variables: { owner, type: WALRUS_BLOB_TYPE, after } })) as Page;
+    }
     if (res.errors?.length) throw new Error(`graphql: ${res.errors[0]?.message}`);
     const objects = res.data?.address?.objects;
     if (!objects) break;

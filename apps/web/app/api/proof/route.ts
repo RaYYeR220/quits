@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 
 let receiptsCache: { at: number; value: { owner: string; agentId: string; count: number; latest: (MemoryReceipt & { suiscan: string })[] } | { error: string } | null } | null = null;
 
-/** The Walrus Blob objects our delegate key wrote, read from chain through Tatum (cached for a minute). */
+/** The Walrus Blob objects our delegate key wrote, read from chain through Tatum (cached for ten minutes). */
 async function onchainReceipts() {
   const owner = process.env.MEMWAL_OWNER_ADDRESS?.trim();
   const agentId = process.env.MEMWAL_AGENT_ID?.trim();
@@ -23,7 +23,11 @@ async function onchainReceipts() {
     const list = await listMemoryReceipts(getSuiGraphql(), owner, { agentId, namespacePrefix: 'quits:' });
     value = { owner, agentId, count: list.length, latest: list.slice(0, 20).map((r) => ({ ...r, suiscan: `https://suiscan.xyz/mainnet/object/${r.objectId}` })) };
   } catch (e) {
+    // keep showing the last good read (it is at most a few minutes old) rather than an error box
+    if (receiptsCache && !('error' in (receiptsCache.value ?? {}))) return receiptsCache.value;
     value = { error: e instanceof Error ? e.message : String(e) };
+    receiptsCache = { at: Date.now() - 540_000, value }; // retry in a minute, not ten
+    return value;
   }
   receiptsCache = { at: Date.now(), value };
   return value;
