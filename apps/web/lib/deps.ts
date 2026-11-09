@@ -92,7 +92,7 @@ export function getQuits(): Promise<Quits> {
     const q = createQuits({
       db,
       memory,
-      llm: createLlm({ apiKey: env('LLM_API_KEY') ?? '', baseUrl: env('LLM_BASE_URL') ?? 'https://api.venice.ai/api/v1', model: env('LLM_MODEL') ?? 'mercury-3' }),
+      llm: createLlm({ apiKey: env('LLM_API_KEY') ?? '', baseUrl: env('LLM_BASE_URL') ?? 'https://api.venice.ai/api/v1', model: env('LLM_MODEL') ?? 'google-gemma-4-26b-a4b-it', fallbackModel: env('LLM_FALLBACK_MODEL') ?? 'google-gemma-4-26b-a4b-it' }),
       fx: fixedRates() ?? { usdcPerFiat: (fiat) => data.usdcPerFiat(fiat) },
     });
     // The in-process memory stand-in lives in this process only, so it is drained here.

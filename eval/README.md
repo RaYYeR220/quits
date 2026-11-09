@@ -46,7 +46,7 @@ People rarely share only one tab. The `trip-after-flat` scenario runs the flat's
 
 ```sh
 pnpm install
-LLM_API_KEY=... pnpm eval                       # all systems, all groups, 4 weeks, seed 20261106, model mercury-3 on Venice
+LLM_API_KEY=... pnpm eval --model=google-gemma-4-26b-a4b-it   # all systems, all groups, 4 weeks, seed 20261106 (the published runs used mercury-3, since retired by Venice)
 pnpm eval --systems=quits,quits-memory-off --scenarios=trip-after-flat --label=v2
 pnpm eval --systems=equal,quits --groups=flat --weeks=2 --seed=7
 pnpm eval --model=gemini-3-8-flash --systems=llm-full-history --no-latest

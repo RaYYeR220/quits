@@ -87,7 +87,7 @@ export function llmFromEnv(env: NodeJS.ProcessEnv, o: { model?: string; concurre
   const apiKey = env.LLM_API_KEY ?? env.VENICE_API_KEY;
   if (!apiKey) throw new Error('set LLM_API_KEY (or EVAL_LLM=fake for an offline run)');
   const baseUrl = env.LLM_BASE_URL ?? 'https://api.venice.ai/api/v1';
-  const model = o.model ?? env.LLM_MODEL ?? 'mercury-3';
+  const model = o.model ?? env.LLM_MODEL ?? 'google-gemma-4-26b-a4b-it';
   const llm = createLlm({ apiKey, baseUrl, model, timeoutMs: 180_000 });
   const retrying = withRetry(llm, { onRetry: (e, n) => o.log?.(`  retry ${n}: ${e.message.slice(0, 120)}`) });
   return { llm: withLimit(retrying, o.concurrency), model, provider: new URL(baseUrl).host };

@@ -150,6 +150,7 @@ Without a database URL the app runs on in-process Postgres; without Walrus Memor
 
 - The benchmark's members are simulated and their habits are written in the rule language Quits learns; see [eval/README.md](eval/README.md).
 - The demo flatmates pay from server-held wallets with small balances and a 1 USDC per-debt cap. Real members sign in with Slush or any Sui wallet, pay from it and sign their own mandate; `scripts/smoke-wallet.ts` runs that whole path on mainnet with two fresh wallets.
+- The benchmark ran on mercury-3, which Venice retired on Nov 9, 2026. The hosted app now runs google-gemma-4-26b-a4b-it with the same prompts (and falls back to it automatically if a configured model disappears); `pnpm eval --model=<id>` reruns the benchmark on any model.
 - Walrus Memory blobs expire after a few epochs; Quits does not renew them yet.
 - The hosted memory relayer sees memory text in plain form before it encrypts it.
 
